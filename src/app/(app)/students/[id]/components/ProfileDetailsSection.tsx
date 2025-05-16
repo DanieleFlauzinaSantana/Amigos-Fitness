@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -5,31 +6,30 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { StudentForm } from '../../components/StudentForm'; // Adjusted path
+import { StudentForm } from '../../components/StudentForm';
 import type { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2 } from 'lucide-react'; 
-
-// Custom icon for "Metas de Fitness" as 'Target' or 'Goal' is not in Lucide. Using an inline SVG.
-const GoalIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12L12 22"></path><path d="M19 12H5"></path><path d="M12 12L18 6"></path><path d="M12 12L6 6"></path><path d="M12 2L12 12"></path></svg>
-);
+import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard } from 'lucide-react'; 
+import { Separator } from '@/components/ui/separator';
 
 
-interface ProfileDetailsSectionProps {
-  student: Student;
-  onUpdateStudent: (updatedStudent: Student) => void;
-}
-
-const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string }) => (
-  <div className="flex items-start space-x-3">
-    <Icon className="h-5 w-5 text-primary mt-1" />
-    <div>
+const DetailItem = ({ icon: Icon, label, value, fullWidth = false }: { icon?: React.ElementType, label: string, value?: string | React.ReactNode, fullWidth?: boolean }) => (
+  <div className={`flex items-start space-x-3 ${fullWidth ? 'md:col-span-2' : ''}`}>
+    {Icon && <Icon className="h-5 w-5 text-primary mt-1 flex-shrink-0" />}
+    <div className="min-w-0">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="text-base text-foreground">{value || 'Não informado'}</p>
+      {typeof value === 'string' ? <p className="text-base text-foreground break-words">{value || 'Não informado'}</p> : <div className="text-base text-foreground">{value || 'Não informado'}</div>}
     </div>
   </div>
 );
+
+const SectionTitleDisplay: React.FC<{ children: React.ReactNode, icon?: React.ElementType }> = ({ children, icon: Icon }) => (
+  <h3 className="text-xl font-semibold mt-6 mb-3 text-primary flex items-center col-span-1 md:col-span-2">
+    {Icon && <Icon className="mr-2 h-5 w-5" />}
+    {children}
+  </h3>
+);
+
 
 export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetailsSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -38,7 +38,6 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
 
   const handleFormSubmit = async (data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl'>) => {
     setIsSubmitting(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const updatedStudentData = { ...student, ...data };
@@ -51,18 +50,23 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
     });
   };
 
-  const formatYesNoNotInformated = (value?: "sim" | "nao" | "nao_informado") => {
+  const formatYesNoNotInformated = (value?: "sim" | "nao" | "nao_informado" | "talvez") => {
     if (value === "sim") return "Sim";
     if (value === "nao") return "Não";
+    if (value === "talvez") return "Talvez";
     return "Não informado";
+  }
+
+  const formatDisplayValue = (value: string | undefined, mapping: Record<string, string>, defaultValue = "Não informado") => {
+    return value ? mapping[value] || value : defaultValue;
   }
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="text-2xl">Perfil do Aluno</CardTitle>
-          <CardDescription>Informações detalhadas e metas.</CardDescription>
+          <CardTitle className="text-2xl">Perfil Completo do Aluno</CardTitle>
+          <CardDescription>Informações detalhadas, preferências e histórico.</CardDescription>
         </div>
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
           <DialogTrigger asChild>
@@ -71,7 +75,7 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
               <span className="sr-only">Editar Perfil</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[625px] max-h-[85vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Editar Perfil de {student.name}</DialogTitle>
             </DialogHeader>
@@ -84,7 +88,7 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-2">
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <Image
             src={student.profilePictureUrl || "https://placehold.co/128x128.png"}
@@ -96,39 +100,59 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
           />
           <div className="text-center sm:text-left">
             <h2 className="text-3xl font-bold text-primary">{student.name}</h2>
-            <p className="text-muted-foreground">{student.email}</p>
-            {student.phone && <p className="text-muted-foreground">{student.phone}</p>}
+            <DetailItem icon={Mail} label="Email" value={student.email} />
+            {student.phone && <DetailItem icon={Phone} label="Telefone" value={student.phone} />}
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+        <Separator className="my-6" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+          <SectionTitleDisplay icon={User}>Informações Pessoais</SectionTitleDisplay>
           <DetailItem icon={Cake} label="Data de Nascimento" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('pt-BR') : undefined} />
-          <DetailItem icon={CalendarDays} label="Data de Início" value={new Date(student.joinDate).toLocaleDateString('pt-BR')} />
-          <DetailItem icon={UsersIcon} label="Tipo de Plano" value={student.membershipType} />
+          <DetailItem icon={CalendarDays} label="Data de Início na Academia" value={new Date(student.joinDate).toLocaleDateString('pt-BR')} />
+          <DetailItem icon={Tag} label="Tipo de Plano (Academia)" value={student.membershipType} />
           <DetailItem icon={Shield} label="Contato de Emergência" value={`${student.emergencyContactName || ''} ${student.emergencyContactPhone || ''}`.trim() || undefined} />
           <DetailItem icon={Snowflake} label="Gosta de Inverno?" value={formatYesNoNotInformated(student.likesWinter)} />
-          <DetailItem icon={UsersIcon} label="Tem Filhos?" value={formatYesNoNotInformated(student.hasChildren)} />
+          <DetailItem icon={Users2} label="Tem Filhos?" value={formatYesNoNotInformated(student.hasChildren)} />
+
+          <SectionTitleDisplay icon={Clock}>🕒 Rotina e Disponibilidade</SectionTitleDisplay>
+          <DetailItem icon={Hourglass} label="Melhor horário para treinar" value={formatDisplayValue(student.bestTrainingTime, {manha: "Manhã", tarde: "Tarde", noite: "Noite"})} />
+          <DetailItem icon={CalendarDays} label="Dias por semana (pretensão)" value={student.daysPerWeek} />
+          <DetailItem icon={Briefcase} label="Horário de Trabalho" value={formatDisplayValue(student.workSchedule, {turnos: "Turnos", fixos: "Horários Fixos", flexivel: "Horários Flexíveis", nao_trabalha: "Não trabalha atualmente"})} />
+          <DetailItem icon={Building2} label="Tempo de deslocamento até academia" value={student.commuteTime} />
+          
+          <SectionTitleDisplay icon={Target}>🧠 Motivação e Objetivos</SectionTitleDisplay>
+          <DetailItem icon={TrendingUp} label="Principal Objetivo" value={formatDisplayValue(student.mainGoal, {emagrecimento: "Emagrecimento", massa_muscular: "Ganho de massa muscular", qualidade_vida: "Qualidade de vida", reabilitacao: "Reabilitação/Condicionamento", socializacao: "Socialização", outro: "Outro"})} />
+          {student.mainGoal === "outro" && student.otherGoalDetail && (
+            <DetailItem label="Detalhe do Outro Objetivo" value={student.otherGoalDetail} fullWidth />
+          )}
+          <DetailItem icon={Building2} label="Já frequentou academia antes?" value={formatYesNoNotInformated(student.attendedGymBefore)} />
+          {student.attendedGymBefore === "sim" && (
+            <>
+              <DetailItem label="Tempo na academia anterior" value={student.previousGymDuration} />
+              <DetailItem label="Motivo da saída da academia anterior" value={student.reasonForLeavingPreviousGym} fullWidth/>
+            </>
+          )}
+          <DetailItem icon={HelpCircle} label="Dificuldades em manter rotina de treinos" value={student.trainingDifficulties} fullWidth/>
+
+          <SectionTitleDisplay icon={HeartPulse}>🩺 Saúde e Condição Física</SectionTitleDisplay>
+          <DetailItem icon={Shield} label="Restrições Médicas?" value={formatYesNoNotInformated(student.medicalRestrictions)} />
+          {student.medicalRestrictions === "sim" && student.medicalRestrictionsDetail && (
+            <DetailItem label="Detalhes das Restrições Médicas" value={student.medicalRestrictionsDetail} fullWidth/>
+          )}
+          <DetailItem icon={UsersIcon} label="Acompanhamento Profissional (Nutri, Médico)?" value={formatYesNoNotInformated(student.professionalFollowUp)} />
+          <DetailItem icon={TrendingUp} label="Estado de Saúde Atual" value={formatDisplayValue(student.currentHealthStatus, {excelente: "Excelente", bom: "Bom", regular: "Regular", ruim: "Ruim"})} />
+
+          <SectionTitleDisplay icon={MessageCircle}>💬 Engajamento e Expectativa</SectionTitleDisplay>
+          <DetailItem icon={Lightbulb} label="O que motiva a continuar treinando?" value={student.motivationSource} fullWidth />
+          <DetailItem icon={AlertTriangle} label="Fatores que poderiam levar à desistência" value={student.potentialQuitFactors} fullWidth />
+          <DetailItem icon={Smartphone} label="Gostaria de acompanhamento por app/mensagens?" value={formatYesNoNotInformated(student.wantsFollowUpApp)} />
+          
+          <SectionTitleDisplay icon={FileTextIcon}>🧾 Dados de Contrato (Opcional)</SectionTitleDisplay>
+          <DetailItem icon={BookOpen} label="Plano Contratado (Duração)" value={formatDisplayValue(student.contractPlan, {mensal: "Mensal", trimestral: "Trimestral", semestral: "Semestral", anual: "Anual"})} />
+          <DetailItem icon={CreditCard} label="Forma de Pagamento" value={formatDisplayValue(student.paymentMethod, {cartao_credito: "Cartão de Crédito", cartao_debito: "Cartão de Débito", pix: "Pix", boleto: "Boleto", dinheiro: "Dinheiro"})} />
         </div>
-
-        {student.fitnessGoals && (
-          <div className="pt-4 border-t">
-            <h3 className="text-lg font-semibold mb-2 text-primary flex items-center">
-                <GoalIcon />
-                <span className="ml-2">Metas de Fitness</span>
-            </h3>
-            <p className="text-foreground whitespace-pre-wrap">{student.fitnessGoals}</p>
-          </div>
-        )}
-
-        {student.previousGyms && (
-          <div className="pt-4 border-t">
-            <h3 className="text-lg font-semibold mb-2 text-primary flex items-center">
-                <Building2 className="mr-2 h-5 w-5" />
-                Treinou em Outras Academias?
-            </h3>
-            <p className="text-foreground whitespace-pre-wrap">{student.previousGyms}</p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

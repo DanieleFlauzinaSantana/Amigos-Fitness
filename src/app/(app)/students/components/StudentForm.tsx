@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Student } from "@/lib/types";
+import { Separator } from "@/components/ui/separator";
 
 const studentFormSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres." }),
@@ -31,12 +33,39 @@ const studentFormSchema = z.object({
   dateOfBirth: z.string().optional(),
   emergencyContactName: z.string().optional(),
   emergencyContactPhone: z.string().optional(),
-  fitnessGoals: z.string().optional(),
   membershipType: z.enum(["Basico", "Premium", "Experimental"]),
   joinDate: z.string().min(1, {message: "Data de início é obrigatória"}),
   likesWinter: z.enum(["sim", "nao", "nao_informado"]).optional(),
   hasChildren: z.enum(["sim", "nao", "nao_informado"]).optional(),
-  previousGyms: z.string().optional(),
+
+  // ROTINA E DISPONIBILIDADE
+  bestTrainingTime: z.enum(["manha", "tarde", "noite", "nao_informado"]).optional(),
+  daysPerWeek: z.string().optional(),
+  workSchedule: z.enum(["turnos", "fixos", "flexivel", "nao_trabalha", "nao_informado"]).optional(),
+  commuteTime: z.string().optional(),
+
+  // MOTIVAÇÃO E OBJETIVOS
+  mainGoal: z.enum(["emagrecimento", "massa_muscular", "qualidade_vida", "reabilitacao", "socializacao", "outro"]).optional(),
+  otherGoalDetail: z.string().optional(),
+  attendedGymBefore: z.enum(["sim", "nao", "nao_informado"]).optional(),
+  previousGymDuration: z.string().optional(),
+  reasonForLeavingPreviousGym: z.string().optional(),
+  trainingDifficulties: z.string().optional(),
+
+  // SAÚDE E CONDIÇÃO FÍSICA
+  medicalRestrictions: z.enum(["sim", "nao", "nao_informado"]).optional(),
+  medicalRestrictionsDetail: z.string().optional(),
+  professionalFollowUp: z.enum(["sim", "nao", "nao_informado"]).optional(),
+  currentHealthStatus: z.enum(["excelente", "bom", "regular", "ruim", "nao_informado"]).optional(),
+
+  // ENGAJAMENTO E EXPECTATIVA
+  motivationSource: z.string().optional(),
+  potentialQuitFactors: z.string().optional(),
+  wantsFollowUpApp: z.enum(["sim", "nao", "talvez", "nao_informado"]).optional(),
+
+  // DADOS DE CONTRATO
+  contractPlan: z.enum(["mensal", "trimestral", "semestral", "anual", "nao_informado"]).optional(),
+  paymentMethod: z.enum(["cartao_credito", "cartao_debito", "pix", "boleto", "dinheiro", "nao_informado"]).optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentFormSchema>;
@@ -48,6 +77,10 @@ interface StudentFormProps {
   isSubmitting?: boolean;
 }
 
+const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <h3 className="text-lg font-semibold text-primary pt-4 col-span-1 md:col-span-2">{children}</h3>
+);
+
 export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: StudentFormProps) {
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
@@ -57,10 +90,27 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       phone: student.phone || '',
       emergencyContactName: student.emergencyContactName || '',
       emergencyContactPhone: student.emergencyContactPhone || '',
-      fitnessGoals: student.fitnessGoals || '',
       likesWinter: student.likesWinter || "nao_informado",
       hasChildren: student.hasChildren || "nao_informado",
-      previousGyms: student.previousGyms || "",
+      bestTrainingTime: student.bestTrainingTime || "nao_informado",
+      daysPerWeek: student.daysPerWeek || "",
+      workSchedule: student.workSchedule || "nao_informado",
+      commuteTime: student.commuteTime || "",
+      mainGoal: student.mainGoal || "qualidade_vida",
+      otherGoalDetail: student.otherGoalDetail || "",
+      attendedGymBefore: student.attendedGymBefore || "nao_informado",
+      previousGymDuration: student.previousGymDuration || "",
+      reasonForLeavingPreviousGym: student.reasonForLeavingPreviousGym || "",
+      trainingDifficulties: student.trainingDifficulties || "",
+      medicalRestrictions: student.medicalRestrictions || "nao_informado",
+      medicalRestrictionsDetail: student.medicalRestrictionsDetail || "",
+      professionalFollowUp: student.professionalFollowUp || "nao_informado",
+      currentHealthStatus: student.currentHealthStatus || "nao_informado",
+      motivationSource: student.motivationSource || "",
+      potentialQuitFactors: student.potentialQuitFactors || "",
+      wantsFollowUpApp: student.wantsFollowUpApp || "nao_informado",
+      contractPlan: student.contractPlan || "nao_informado",
+      paymentMethod: student.paymentMethod || "nao_informado",
     } : {
       name: "",
       email: "",
@@ -68,19 +118,41 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       dateOfBirth: "",
       emergencyContactName: "",
       emergencyContactPhone: "",
-      fitnessGoals: "",
       membershipType: "Basico",
       joinDate: new Date().toISOString().split('T')[0], // Default to today
       likesWinter: "nao_informado",
       hasChildren: "nao_informado",
-      previousGyms: "",
+      bestTrainingTime: "nao_informado",
+      daysPerWeek: "",
+      workSchedule: "nao_informado",
+      commuteTime: "",
+      mainGoal: "qualidade_vida",
+      otherGoalDetail: "",
+      attendedGymBefore: "nao_informado",
+      previousGymDuration: "",
+      reasonForLeavingPreviousGym: "",
+      trainingDifficulties: "",
+      medicalRestrictions: "nao_informado",
+      medicalRestrictionsDetail: "",
+      professionalFollowUp: "nao_informado",
+      currentHealthStatus: "nao_informado",
+      motivationSource: "",
+      potentialQuitFactors: "",
+      wantsFollowUpApp: "nao_informado",
+      contractPlan: "nao_informado",
+      paymentMethod: "nao_informado",
     },
   });
+
+  const mainGoalValue = form.watch("mainGoal");
+  const attendedGymBeforeValue = form.watch("attendedGymBefore");
+  const medicalRestrictionsValue = form.watch("medicalRestrictions");
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SectionTitle>Informações Pessoais</SectionTitle>
           <FormField
             control={form.control}
             name="name"
@@ -151,7 +223,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="membershipType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Plano</FormLabel>
+                <FormLabel>Tipo de Plano (Academia)</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -238,45 +310,330 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
               </FormItem>
             )}
           />
+
+          <Separator className="md:col-span-2 my-4" />
+          <SectionTitle>🕒 Rotina e Disponibilidade</SectionTitle>
+
+          <FormField
+            control={form.control}
+            name="bestTrainingTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Melhor horário para frequentar?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="manha">Manhã</SelectItem>
+                    <SelectItem value="tarde">Tarde</SelectItem>
+                    <SelectItem value="noite">Noite</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="daysPerWeek"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Quantos dias por semana pretende treinar?</FormLabel>
+                <FormControl><Input placeholder="Ex: 3 dias" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="workSchedule"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Trabalha em turnos ou horários fixos?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="turnos">Turnos</SelectItem>
+                    <SelectItem value="fixos">Horários Fixos</SelectItem>
+                    <SelectItem value="flexivel">Horários Flexíveis</SelectItem>
+                    <SelectItem value="nao_trabalha">Não trabalha atualmente</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="commuteTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tempo de deslocamento até a academia?</FormLabel>
+                <FormControl><Input placeholder="Ex: 15 minutos" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <Separator className="md:col-span-2 my-4" />
+          <SectionTitle>🧠 Motivação e Objetivos</SectionTitle>
+
+          <FormField
+            control={form.control}
+            name="mainGoal"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Principal objetivo com a academia?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "qualidade_vida"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
+                    <SelectItem value="massa_muscular">Ganho de massa muscular</SelectItem>
+                    <SelectItem value="qualidade_vida">Qualidade de vida</SelectItem>
+                    <SelectItem value="reabilitacao">Reabilitação/condicionamento</SelectItem>
+                    <SelectItem value="socializacao">Socialização</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {mainGoalValue === "outro" && (
+            <FormField
+              control={form.control}
+              name="otherGoalDetail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Qual outro objetivo?</FormLabel>
+                  <FormControl><Textarea placeholder="Descreva seu outro objetivo" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <FormField
+            control={form.control}
+            name="attendedGymBefore"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Já frequentou academia antes?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {attendedGymBeforeValue === "sim" && (
+            <>
+              <FormField
+                control={form.control}
+                name="previousGymDuration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Por quanto tempo permaneceu?</FormLabel>
+                    <FormControl><Input placeholder="Ex: 1 ano" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="reasonForLeavingPreviousGym"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Por que saiu da academia anterior?</FormLabel>
+                    <FormControl><Textarea placeholder="Descreva o motivo" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          <FormField
+            control={form.control}
+            name="trainingDifficulties"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Já teve dificuldades em manter uma rotina de treinos? Quais?</FormLabel>
+                <FormControl><Textarea placeholder="Descreva as dificuldades" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Separator className="md:col-span-2 my-4" />
+          <SectionTitle>🩺 Saúde e Condição Física</SectionTitle>
+          
+          <FormField
+            control={form.control}
+            name="medicalRestrictions"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Possui alguma restrição médica?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {medicalRestrictionsValue === "sim" && (
+            <FormField
+              control={form.control}
+              name="medicalRestrictionsDetail"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Detalhe as restrições médicas</FormLabel>
+                  <FormControl><Textarea placeholder="Descreva as restrições" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <FormField
+            control={form.control}
+            name="professionalFollowUp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Faz acompanhamento profissional (nutri, médico)?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="currentHealthStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Avalia seu estado de saúde atual como:</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="excelente">Excelente</SelectItem>
+                    <SelectItem value="bom">Bom</SelectItem>
+                    <SelectItem value="regular">Regular</SelectItem>
+                    <SelectItem value="ruim">Ruim</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Separator className="md:col-span-2 my-4" />
+          <SectionTitle>💬 Engajamento e Expectativa</SectionTitle>
+
+          <FormField
+            control={form.control}
+            name="motivationSource"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>O que te motiva a continuar treinando regularmente?</FormLabel>
+                <FormControl><Textarea placeholder="Descreva suas motivações" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="potentialQuitFactors"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Quais fatores poderiam fazer você desistir da academia?</FormLabel>
+                <FormControl><Textarea placeholder="Descreva os fatores" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="wantsFollowUpApp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gostaria de acompanhamento por app/mensagens?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="talvez">Talvez</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <Separator className="md:col-span-2 my-4" />
+          <SectionTitle>🧾 Dados de Contrato (Opcional)</SectionTitle>
+
+          <FormField
+            control={form.control}
+            name="contractPlan"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plano Contratado (Duração)</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="mensal">Mensal</SelectItem>
+                    <SelectItem value="trimestral">Trimestral</SelectItem>
+                    <SelectItem value="semestral">Semestral</SelectItem>
+                    <SelectItem value="anual">Anual</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="paymentMethod"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Forma de Pagamento</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                    <SelectItem value="pix">Pix</SelectItem>
+                    <SelectItem value="boleto">Boleto</SelectItem>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-        <FormField
-            control={form.control}
-            name="fitnessGoals"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Metas de Fitness</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Descreva as metas do aluno..."
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Seja específico sobre os objetivos do aluno.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <FormField
-            control={form.control}
-            name="previousGyms"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Já treinou em outras academias?</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Se sim, quais? Alguma observação?"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <div className="flex justify-end space-x-2">
+
+        <div className="flex justify-end space-x-2 pt-6">
           {onCancel && <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>Cancelar</Button>}
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Salvando..." : (student ? "Salvar Alterações" : "Adicionar Aluno")}
