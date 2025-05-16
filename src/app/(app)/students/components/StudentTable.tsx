@@ -25,9 +25,10 @@ import type { Student } from "@/lib/types";
 
 interface StudentTableProps {
   students: Student[];
+  linkBasePath?: string; // Nova propriedade para o caminho base do link
 }
 
-export function StudentTable({ students }: StudentTableProps) {
+export function StudentTable({ students, linkBasePath = "/students" }: StudentTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -58,7 +59,7 @@ export function StudentTable({ students }: StudentTableProps) {
               />
             </TableCell>
             <TableCell className="font-medium">
-              <Link href={`/students/${student.id}`} className="hover:underline text-primary">
+              <Link href={`${linkBasePath}/${student.id}`} className="hover:underline text-primary">
                 {student.name}
               </Link>
             </TableCell>
@@ -82,13 +83,17 @@ export function StudentTable({ students }: StudentTableProps) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Ações</DropdownMenuLabel>
                   <DropdownMenuItem asChild>
-                     <Link href={`/students/${student.id}`} className="flex items-center">
-                        <Eye className="mr-2 h-4 w-4" /> Ver Detalhes
+                     <Link href={`${linkBasePath}/${student.id}`} className="flex items-center">
+                        <Eye className="mr-2 h-4 w-4" /> Ver Detalhes / Analisar
                      </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Editar</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                  {linkBasePath === "/students" && ( // Mostrar apenas se estiver na página de estudantes
+                    <>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

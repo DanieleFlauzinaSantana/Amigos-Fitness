@@ -1,68 +1,52 @@
-
 // src/app/(app)/predictions/page.tsx
 "use client";
 
-import Link from 'next/link';
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, Users, Sparkles } from 'lucide-react';
+import { StudentTable } from "@/app/(app)/students/components/StudentTable"; // Reutilizando a tabela de estudantes
+import { MOCK_STUDENTS } from "@/lib/constants";
+import type { Student } from "@/lib/types";
+import { AlertTriangle } from "lucide-react";
 
-export default function PredictionsPage() {
+export default function PredictionsListPage() {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate fetching data
+    setTimeout(() => {
+      setStudents(MOCK_STUDENTS);
+      setIsLoading(false);
+    }, 300); // Reduced delay for faster loading
+  }, []);
+
   return (
     <div>
       <PageHeader 
-        title="Previsão de Desistência (IA)" 
-        description="Entenda como a inteligência artificial ajuda a identificar alunos em risco."
+        title="Análise de Risco de Desistência" 
+        description="Selecione um aluno abaixo para analisar o risco de desistência e gerar notificações de ausência."
       />
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Sparkles className="mr-2 h-6 w-6 text-primary" />
-            Como Funciona a Previsão de Desistência
-          </CardTitle>
+          <CardTitle>Lista de Alunos para Análise</CardTitle>
           <CardDescription>
-            A análise de risco de desistência é uma ferramenta poderosa para ajudar na retenção de alunos.
+            Clique no nome de um aluno para acessar as ferramentas de previsão e notificação.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            A inteligência artificial analisa diversos fatores do perfil e histórico do aluno para calcular uma probabilidade de ele deixar a academia. Esses fatores incluem:
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground pl-4">
-            <li>Padrões de frequência (faltas recentes, faltas consecutivas, diminuição da frequência).</li>
-            <li>Dados do perfil do aluno (idade, tipo de plano, objetivos).</li>
-            <li>Feedback fornecido em pesquisas de satisfação (se disponível e respondido).</li>
-          </ul>
-          <p className="text-muted-foreground">
-            Com base nessa análise, a IA fornece um nível de risco (baixo, médio ou alto), os motivos potenciais para esse risco e recomendações de ações que você pode tomar.
-          </p>
-          <div className="bg-accent/10 p-4 rounded-lg">
-            <h4 className="font-semibold text-lg text-accent-foreground mb-2 flex items-center">
-              <AlertTriangle className="mr-2 h-5 w-5" /> Onde Encontrar a Análise?
-            </h4>
-            <p className="text-accent-foreground/90">
-              A funcionalidade de "Previsão de Desistência" é acessada individualmente para cada aluno.
+        <CardContent>
+          {isLoading ? (
+            <p>Carregando alunos...</p>
+          ) : students.length > 0 ? (
+            <StudentTable students={students} linkBasePath="/predictions" />
+          ) : (
+            <p className="flex items-center text-muted-foreground">
+                <AlertTriangle className="mr-2 h-5 w-5 text-yellow-500" />
+                Nenhum aluno cadastrado para análise.
             </p>
-            <p className="text-accent-foreground/90 mt-1">
-              Para analisar um aluno específico:
-            </p>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-accent-foreground/90 pl-4 mt-2">
-              <li>Navegue até a seção "Alunos".</li>
-              <li>Clique no nome do aluno desejado para ver seus detalhes.</li>
-              <li>Na página de detalhes do aluno, você encontrará a seção "Previsão de Desistência (IA)".</li>
-              <li>Clique no botão "Analisar Risco de Desistência" para obter a previsão.</li>
-            </ol>
-          </div>
-          <Button asChild className="mt-4">
-            <Link href="/students">
-              <Users className="mr-2 h-4 w-4" /> Ver Lista de Alunos
-            </Link>
-          </Button>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
-
-    
