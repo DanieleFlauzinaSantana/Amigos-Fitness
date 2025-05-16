@@ -5,10 +5,10 @@
 import { useParams, useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BarChart3 } from 'lucide-react'; // Importado BarChart3
+import { ArrowLeft, BarChart3 } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MOCK_SURVEY, MOCK_STUDENTS } from '@/lib/constants';
-import { SimulatedSurveyResults } from '../components/SimulatedSurveyResults'; // Importado o componente
+import { SimulatedSurveyResults } from '../../components/SimulatedSurveyResults'; // Corrected import path
 
 export default function SurveyResultsPage() {
   const router = useRouter();
@@ -35,10 +35,6 @@ export default function SurveyResultsPage() {
       </div>
     );
   }
-
-  // Nota: As respostas individuais reais (se implementadas com backend)
-  // seriam acessadas através do perfil do aluno.
-  // A SimulatedSurveyResults abaixo usa dados totalmente fictícios para fins de demonstração.
 
   return (
     <div className="container mx-auto py-8 px-4">
