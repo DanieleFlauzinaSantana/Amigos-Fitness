@@ -12,7 +12,7 @@ import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { ClipboardCheck, CheckCircle, XCircle } from 'lucide-react'; // Ícone alterado de ScanLine
+import { ClipboardCheck, CheckCircle, XCircle } from 'lucide-react';
 
 export default function CheckinPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function CheckinPage() {
       toast({
         variant: 'destructive',
         title: 'Campo Obrigatório',
-        description: 'Por favor, insira o Número de Inscrição do aluno.',
+        description: 'Por favor, insira seu Número de Inscrição.',
       });
       return;
     }
@@ -39,7 +39,7 @@ export default function CheckinPage() {
         toast({
           variant: 'destructive',
           title: 'Aluno Não Encontrado',
-          description: `Nenhum aluno encontrado com o Número de Inscrição: ${studentIdInput}.`,
+          description: `Nenhum aluno encontrado com o Número de Inscrição: ${studentIdInput}. Verifique o número e tente novamente.`,
         });
         setIsLoading(false);
         return;
@@ -55,10 +55,11 @@ export default function CheckinPage() {
         toast({
           variant: 'default',
           title: 'Check-in já Realizado',
-          description: `${student.name} já realizou o check-in hoje.`,
+          description: `${student.name}, seu check-in de hoje já foi registrado.`,
         });
         setIsLoading(false);
-        router.push(`/students/${student.id}`);
+        // Poderia redirecionar para uma página de boas-vindas ou manter na mesma.
+        // router.push(`/students/${student.id}`); 
         return;
       }
 
@@ -77,12 +78,13 @@ export default function CheckinPage() {
 
       toast({
         title: 'Check-in Confirmado!',
-        description: `Presença registrada para ${student.name} em ${format(new Date(), 'dd/MM/yyyy')}.`,
-        action: (
-          <Button variant="outline" size="sm" onClick={() => router.push(`/students/${student.id}`)}>
-            Ver Aluno
-          </Button>
-        ),
+        description: `Olá ${student.name}! Sua presença foi registrada para ${format(new Date(), 'dd/MM/yyyy')}.`,
+        // Ação de ver aluno pode não ser relevante para o aluno fazendo check-in.
+        // action: (
+        //   <Button variant="outline" size="sm" onClick={() => router.push(`/students/${student.id}`)}>
+        //     Ver Aluno
+        //   </Button>
+        // ),
       });
       
       setStudentIdInput(''); 
@@ -93,28 +95,30 @@ export default function CheckinPage() {
   return (
     <div>
       <PageHeader 
-        title="Check-in por Número de Inscrição" 
-        description="Insira o Número de Inscrição do aluno para registrar a presença."
+        title="Registro de Presença" 
+        description="Aluno, digite seu Número de Inscrição para registrar sua presença hoje."
       />
       <Card className="max-w-md mx-auto">
         <CardHeader>
-          <CardTitle className="flex items-center"><ClipboardCheck className="mr-2 h-6 w-6 text-primary" /> Registrar Presença</CardTitle>
+          <CardTitle className="flex items-center"><ClipboardCheck className="mr-2 h-6 w-6 text-primary" /> Bem-vindo(a)!</CardTitle>
           <CardDescription>
-            Insira o Número de Inscrição do aluno abaixo.
+            Use o teclado para inserir seu Número de Inscrição abaixo e confirme seu check-in.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="studentId">Número de Inscrição do Aluno</Label>
+            <Label htmlFor="studentId">Seu Número de Inscrição</Label>
             <Input
               id="studentId"
-              placeholder="Digite o Número de Inscrição"
+              placeholder="Digite seu Número de Inscrição aqui"
               value={studentIdInput}
               onChange={(e) => setStudentIdInput(e.target.value)}
               disabled={isLoading}
+              // Adicionando autoFocus para conveniência em totens
+              autoFocus 
             />
           </div>
-          <Button onClick={handleCheckin} className="w-full" disabled={isLoading}>
+          <Button onClick={handleCheckin} className="w-full" disabled={isLoading} size="lg">
             {isLoading ? (
               "Registrando..."
             ) : (
@@ -124,7 +128,8 @@ export default function CheckinPage() {
             )}
           </Button>
            <p className="text-xs text-center text-muted-foreground pt-4">
-            Esta página permite o registro de presença usando o Número de Inscrição único de cada aluno.
+            Esta página é ideal para totens de autoatendimento na entrada da academia. 
+            Se precisar de ajuda, procure um instrutor.
           </p>
         </CardContent>
       </Card>
