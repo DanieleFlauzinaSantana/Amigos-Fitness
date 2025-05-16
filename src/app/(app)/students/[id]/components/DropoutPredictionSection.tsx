@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { predictDropout, type PredictDropoutInput, type PredictDropoutOutput } from '@/ai/flows/predict-dropout';
-import type { Student, DropoutPredictionResult } from '@/lib/types';
+import type { Student, DropoutPredictionResult, SurveyFeedbackForAI, SurveyAnswer } from '@/lib/types';
 import { TrendingUp, TrendingDown, AlertTriangle, Sparkles, Lightbulb, ListChecks } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 
@@ -19,10 +19,38 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const extractSurveyFeedback = (): SurveyFeedbackForAI | undefined => {
+    if (!student.latestSurveyResponse) return undefined;
+
+    const feedback: SurveyFeedbackForAI = {};
+    const getAnswerValue = (questionId: string): SurveyAnswer | undefined => 
+      student.latestSurveyResponse?.answers.find(a => a.questionId === questionId);
+
+    const q1 = getAnswerValue('q1'); // Satisfação Geral
+    if (q1 && typeof q1.value === 'number') feedback.overallSatisfaction = q1.value;
+    
+    const q2 = getAnswerValue('q2'); // Limpeza
+    if (q2 && typeof q2.value === 'number') feedback.facilityCleanliness = q2.value;
+
+    const q3 = getAnswerValue('q3'); // Equipamentos
+    if (q3) feedback.equipmentSatisfaction = String(q3.value);
+    
+    const q4 = getAnswerValue('q4'); // Recomendaria
+    if (q4 && typeof q4.value === 'number') feedback.likelyToRecommend = q4.value;
+
+    const q5 = getAnswerValue('q5'); // Comentários
+    if (q5 && typeof q5.value === 'string') feedback.comments = q5.value;
+    
+    return Object.keys(feedback).length > 0 ? feedback : undefined;
+  };
+
+
   const handlePredictDropout = async () => {
     setIsLoading(true);
     setError(null);
     setPrediction(null);
+
+    const surveyFeedback = extractSurveyFeedback();
 
     const input: PredictDropoutInput = {
       attendanceRecords: student.attendance.map(att => ({
@@ -34,7 +62,7 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
         fitnessGoals: student.mainGoal || "Não especificado",
         membershipType: student.membershipType,
       },
-      // surveyFeedback removido
+      surveyFeedback: surveyFeedback,
     };
 
     try {

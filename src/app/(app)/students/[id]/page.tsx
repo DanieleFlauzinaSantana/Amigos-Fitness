@@ -10,22 +10,19 @@ import { AttendanceSection } from './components/AttendanceSection';
 import { DropoutPredictionSection } from './components/DropoutPredictionSection';
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
 import { StudentIdSection } from './components/StudentIdSection';
-// StudentSurveyResponseSection removida
+import { StudentSurveyResponseSection } from './components/StudentSurveyResponseSection'; // Restaurado
 import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink } from 'lucide-react'; // ExternalLink adicionado
+import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { calculateConsecutiveAbsences } from '@/lib/utils';
 import { ABSENCE_THRESHOLD } from '@/lib/config';
-import Link from 'next/link'; // Link adicionado
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'; // Card etc adicionado
-import { FileText } from 'lucide-react'; // FileText adicionado
+// Removido Link e Card de Google Forms
 
 const CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK = 5;
-// Link de exemplo para um Google Form. Substitua pelo seu link real que será usado para todos os alunos.
-const GOOGLE_FORM_LINK_FOR_STUDENTS = "https://forms.gle/exemploDeFormulario"; // Substitua este link!
+// Removido GOOGLE_FORM_LINK_FOR_STUDENTS
 
 
 export default function StudentDetailPage() {
@@ -36,7 +33,7 @@ export default function StudentDetailPage() {
 
   const [student, setStudent] = useState<Student | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [previousMissedCount, setPreviousMissedCount] = useState<number | null>(null);
+  // const [previousMissedCount, setPreviousMissedCount] = useState<number | null>(null); // Não parece ser usado
 
 
   useEffect(() => {
@@ -46,7 +43,7 @@ export default function StudentDetailPage() {
         const foundStudent = MOCK_STUDENTS.find(s => s.id === studentId);
         if (foundStudent) {
           setStudent(foundStudent);
-          setPreviousMissedCount(foundStudent.missedClassesCount);
+          // setPreviousMissedCount(foundStudent.missedClassesCount); // Não parece ser usado
         } else {
           router.push('/students'); 
         }
@@ -90,11 +87,11 @@ export default function StudentDetailPage() {
           description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. Considere enviar o link da pesquisa de satisfação.`,
           variant: "default",
           duration: 7000,
-          action: (
+          action: ( // Ação agora abre o link da pesquisa interna
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => window.open(GOOGLE_FORM_LINK_FOR_STUDENTS, '_blank')}
+              onClick={() => router.push(`/surveys/${student.latestSurveyResponse?.surveyId || 'survey1'}/submit?studentId=${student.id}`)}
             >
               Abrir Pesquisa
             </Button>
@@ -148,28 +145,7 @@ export default function StudentDetailPage() {
           <StudentIdSection student={student} />
           <DropoutPredictionSection student={student} />
           <AbsenceNotificationSection student={student} />
-          {/* Seção de Pesquisa do Aluno - adaptada para link externo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-6 w-6 text-primary" /> Pesquisa de Satisfação
-              </CardTitle>
-              <CardDescription>Envie o link da pesquisa de satisfação para {student.name}.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                As respostas são coletadas e gerenciadas através do Google Forms.
-              </p>
-              <Button asChild className="w-full" variant="outline">
-                <Link href={GOOGLE_FORM_LINK_FOR_STUDENTS} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" /> Abrir Link da Pesquisa (Google Forms)
-                </Link>
-              </Button>
-               <p className="text-xs text-muted-foreground pt-2">
-                Para associar a resposta a este aluno, você pode configurar seu Google Form para pedir o ID ou nome do aluno.
-              </p>
-            </CardContent>
-          </Card>
+          <StudentSurveyResponseSection student={student} /> {/* Restaurado */}
         </div>
       </div>
     </div>

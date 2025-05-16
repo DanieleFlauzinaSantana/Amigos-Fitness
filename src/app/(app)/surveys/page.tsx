@@ -5,39 +5,65 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, ExternalLink } from "lucide-react";
+import { FileText, Edit, BarChart2, Send } from "lucide-react";
+import { MOCK_SURVEY } from "@/lib/constants";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import Image from "next/image";
 
-// Link de exemplo para um Google Form. Substitua pelo seu link real.
-const GOOGLE_FORM_LINK = "https://forms.gle/exemploDeFormulario"; // Substitua este link!
 
 export default function SurveysPage() {
+  const survey = MOCK_SURVEY; // Usando a pesquisa mockada
+
   return (
     <div>
-      <PageHeader title="Pesquisas de Satisfação" description="Colete feedback valioso dos seus alunos utilizando o Google Forms." />
+      <PageHeader title="Pesquisas de Satisfação" description="Gerencie e analise o feedback dos seus alunos." />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="col-span-1 md:col-span-2 lg:col-span-3">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl flex items-center"><FileText className="mr-2 h-5 w-5 text-primary"/>Pesquisa de Satisfação da Academia</CardTitle>
+              <CardTitle className="text-xl flex items-center"><FileText className="mr-2 h-5 w-5 text-primary"/>{survey.title}</CardTitle>
+              <div className="flex space-x-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      {/* Botão de editar desabilitado, edição é feita no código */}
+                      <Button variant="outline" size="icon" disabled> 
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edição no código (constants.ts)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Button variant="outline" size="icon" asChild>
+                  <Link href={`/surveys/${survey.id}/results`}>
+                    <BarChart2 className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
             <CardDescription>
-              Utilizamos o Google Forms para coletar feedback. Clique no botão abaixo para acessar ou compartilhar o formulário.
-              As respostas e a edição das perguntas são gerenciadas diretamente no Google Forms.
+              {survey.description}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col md:flex-row gap-6 items-center">
             <div className="flex-1">
-              <h3 className="font-semibold mb-1">Link da Pesquisa:</h3>
-              <Link href={GOOGLE_FORM_LINK} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all">
-                {GOOGLE_FORM_LINK}
-              </Link>
-              <p className="text-sm text-muted-foreground mt-2">
-                Crie sua pesquisa no Google Forms e cole o link compartilhável aqui no código (no arquivo `src/app/(app)/surveys/page.tsx`, substitua a constante `GOOGLE_FORM_LINK`).
-              </p>
+                <h3 className="font-semibold mb-1">Link para Responder:</h3>
+                <p className="text-sm text-muted-foreground">
+                    Use o link abaixo para que os alunos respondam à pesquisa. Você pode adicionar o ID do aluno ao final do link para pré-identificação (ex: `?studentId=ALUNO_ID`).
+                </p>
+                <Link href={`/surveys/${survey.id}/submit`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-1 block">
+                    {`${window.location.origin}/surveys/${survey.id}/submit`}
+                </Link>
             </div>
-            <Image 
+             <Image 
               src="https://placehold.co/200x150.png" 
               alt="Ilustração de pesquisa" 
               data-ai-hint="survey feedback" 
@@ -48,8 +74,8 @@ export default function SurveysPage() {
           </CardContent>
           <CardFooter>
             <Button asChild className="w-full md:w-auto">
-              <Link href={GOOGLE_FORM_LINK} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" /> Abrir Pesquisa no Google Forms
+              <Link href={`/surveys/${survey.id}/submit`} target="_blank" rel="noopener noreferrer">
+                <Send className="mr-2 h-4 w-4" /> Abrir Formulário da Pesquisa
               </Link>
             </Button>
           </CardFooter>

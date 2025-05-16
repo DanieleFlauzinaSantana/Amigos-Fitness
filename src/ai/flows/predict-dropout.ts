@@ -12,6 +12,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { SurveyFeedbackForAI } from '@/lib/types';
+
 
 const PredictDropoutInputSchema = z.object({
   attendanceRecords: z
@@ -25,7 +27,13 @@ const PredictDropoutInputSchema = z.object({
       engagementLevel: z.string().optional(),
     })
     .describe('Dados do perfil do usuário incluindo idade, objetivos de fitness e tipo de plano.'),
-  // surveyFeedback foi removido pois as respostas agora estão no Google Forms.
+  surveyFeedback: z.object({
+      overallSatisfaction: z.number().optional().describe('Nível de satisfação geral do aluno (1-5).'),
+      facilityCleanliness: z.number().optional().describe('Avaliação da limpeza (1-5).'),
+      equipmentSatisfaction: z.string().optional().describe('Satisfação com os equipamentos (sim/nao).'),
+      likelyToRecommend: z.number().optional().describe('Probabilidade de recomendar a academia (1-5).'),
+      comments: z.string().optional().describe('Comentários ou sugestões do aluno.'),
+    }).optional().describe('Feedback da última pesquisa de satisfação respondida pelo aluno.'),
 });
 export type PredictDropoutInput = z.infer<typeof PredictDropoutInputSchema>;
 
@@ -52,7 +60,7 @@ const prompt = ai.definePrompt({
   output: {schema: PredictDropoutOutputSchema},
   prompt: `Você é um assistente de IA que ajuda gerentes de academia a prever se um aluno irá desistir e fornece recomendações para evitar isso. Responda em português.
 
-  Analise os seguintes registros de frequência e dados do perfil para prever o risco de desistência. Forneça motivos para sua previsão e recomendações para mitigar o risco.
+  Analise os seguintes registros de frequência, dados do perfil e feedback da pesquisa (se disponível) para prever o risco de desistência. Forneça motivos para sua previsão e recomendações para mitigar o risco.
 
   Registros de Frequência:
   {{#each attendanceRecords}}
@@ -67,8 +75,29 @@ const prompt = ai.definePrompt({
   - Nível de Engajamento: {{profileData.engagementLevel}}
   {{/if}}
 
+  {{#if surveyFeedback}}
+  Feedback da Pesquisa de Satisfação:
+  {{#if surveyFeedback.overallSatisfaction}}
+  - Satisfação Geral: {{surveyFeedback.overallSatisfaction}}/5
+  {{/if}}
+  {{#if surveyFeedback.facilityCleanliness}}
+  - Avaliação da Limpeza: {{surveyFeedback.facilityCleanliness}}/5
+  {{/if}}
+  {{#if surveyFeedback.equipmentSatisfaction}}
+  - Equipamentos Atendem: {{surveyFeedback.equipmentSatisfaction}}
+  {{/if}}
+  {{#if surveyFeedback.likelyToRecommend}}
+  - Recomendaria a Academia: {{surveyFeedback.likelyToRecommend}}/5
+  {{/if}}
+  {{#if surveyFeedback.comments}}
+  - Comentários Adicionais: "{{surveyFeedback.comments}}"
+  {{/if}}
+  {{/if}}
+
   Com base nessas informações, determine o dropoutRisk (um valor entre 0 e 1), os motivos (reasons) e as recomendações (recommendations).
   Gere as razões e recomendações em português.
+  Se o feedback da pesquisa for predominantemente negativo, isso deve aumentar o risco de desistência. Se for positivo, pode diminuir ou manter, dependendo dos outros fatores.
+  Considere padrões de frequência (ex: longas ausências, frequência decrescente) como indicadores importantes.
   `,
 });
 
