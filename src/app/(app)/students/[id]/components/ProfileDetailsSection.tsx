@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { StudentForm } from '../../components/StudentForm';
 import type { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard, Binary, HeartHandshake, DollarSign, GraduationCap, Contact } from 'lucide-react'; 
+import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard, Binary, HeartHandshake, DollarSign, GraduationCap, Contact, Lightbulb, AlertTriangle } from 'lucide-react'; 
 import { Separator } from '@/components/ui/separator';
 
 
@@ -97,6 +97,62 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
     nao_informado: "Não informado"
   };
 
+  const membershipTypeMap = {
+    Basico: "Básico",
+    Premium: "Premium",
+    Experimental: "Experimental"
+  };
+
+  const bestTrainingTimeMap = {
+    manha: "Manhã", 
+    tarde: "Tarde", 
+    noite: "Noite",
+    nao_informado: "Não informado"
+  };
+
+  const workScheduleMap = {
+    turnos: "Turnos", 
+    fixos: "Horários Fixos", 
+    flexivel: "Horários Flexíveis", 
+    nao_trabalha: "Não trabalha atualmente",
+    nao_informado: "Não informado"
+  };
+  
+  const mainGoalMap = {
+    emagrecimento: "Emagrecimento", 
+    massa_muscular: "Ganho de massa muscular", 
+    qualidade_vida: "Qualidade de vida", 
+    reabilitacao: "Reabilitação/Condicionamento", 
+    socializacao: "Socialização", 
+    outro: "Outro",
+    nao_informado: "Não informado"
+  };
+
+  const currentHealthStatusMap = {
+    excelente: "Excelente", 
+    bom: "Bom", 
+    regular: "Regular", 
+    ruim: "Ruim",
+    nao_informado: "Não informado"
+  };
+
+  const contractPlanMap = {
+    mensal: "Mensal", 
+    trimestral: "Trimestral", 
+    semestral: "Semestral", 
+    anual: "Anual",
+    nao_informado: "Não informado"
+  };
+
+  const paymentMethodMap = {
+    cartao_credito: "Cartão de Crédito", 
+    cartao_debito: "Cartão de Débito", 
+    pix: "Pix", 
+    boleto: "Boleto", 
+    dinheiro: "Dinheiro",
+    nao_informado: "Não informado"
+  };
+
 
   return (
     <Card>
@@ -146,9 +202,9 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
           <SectionTitleDisplay icon={User}>Informações Pessoais Básicas</SectionTitleDisplay>
-          <DetailItem icon={Cake} label="Data de Nascimento" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('pt-BR') : undefined} />
-          <DetailItem icon={CalendarDays} label="Data de Início na Academia" value={new Date(student.joinDate).toLocaleDateString('pt-BR')} />
-          <DetailItem icon={Tag} label="Tipo de Plano (Academia)" value={student.membershipType} />
+          <DetailItem icon={Cake} label="Data de Nascimento" value={student.dateOfBirth ? new Date(student.dateOfBirth + 'T00:00:00').toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : undefined} />
+          <DetailItem icon={CalendarDays} label="Data de Início na Academia" value={new Date(student.joinDate + 'T00:00:00').toLocaleDateString('pt-BR', {timeZone: 'UTC'})} />
+          <DetailItem icon={Tag} label="Tipo de Plano (Academia)" value={formatDisplayValue(student.membershipType, membershipTypeMap)} />
           <DetailItem icon={Shield} label="Contato de Emergência" value={`${student.emergencyContactName || ''} ${student.emergencyContactPhone || ''}`.trim() || undefined} />
 
           <SectionTitleDisplay icon={Contact}>Informações Pessoais Detalhadas</SectionTitleDisplay>
@@ -162,13 +218,13 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
           
 
           <SectionTitleDisplay icon={Clock}>🕒 Rotina e Disponibilidade</SectionTitleDisplay>
-          <DetailItem icon={Hourglass} label="Melhor horário para treinar" value={formatDisplayValue(student.bestTrainingTime, {manha: "Manhã", tarde: "Tarde", noite: "Noite"})} />
+          <DetailItem icon={Hourglass} label="Melhor horário para treinar" value={formatDisplayValue(student.bestTrainingTime, bestTrainingTimeMap)} />
           <DetailItem icon={CalendarDays} label="Dias por semana (pretensão)" value={student.daysPerWeek} />
-          <DetailItem icon={Briefcase} label="Horário de Trabalho" value={formatDisplayValue(student.workSchedule, {turnos: "Turnos", fixos: "Horários Fixos", flexivel: "Horários Flexíveis", nao_trabalha: "Não trabalha atualmente"})} />
+          <DetailItem icon={Briefcase} label="Horário de Trabalho" value={formatDisplayValue(student.workSchedule, workScheduleMap)} />
           <DetailItem icon={Building2} label="Tempo de deslocamento até academia" value={student.commuteTime} />
           
           <SectionTitleDisplay icon={Target}>🧠 Motivação e Objetivos</SectionTitleDisplay>
-          <DetailItem icon={TrendingUp} label="Principal Objetivo" value={formatDisplayValue(student.mainGoal, {emagrecimento: "Emagrecimento", massa_muscular: "Ganho de massa muscular", qualidade_vida: "Qualidade de vida", reabilitacao: "Reabilitação/Condicionamento", socializacao: "Socialização", outro: "Outro"})} />
+          <DetailItem icon={TrendingUp} label="Principal Objetivo" value={formatDisplayValue(student.mainGoal, mainGoalMap)} />
           {student.mainGoal === "outro" && student.otherGoalDetail && (
             <DetailItem label="Detalhe do Outro Objetivo" value={student.otherGoalDetail} fullWidth />
           )}
@@ -187,7 +243,7 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
             <DetailItem label="Detalhes das Restrições Médicas" value={student.medicalRestrictionsDetail} fullWidth/>
           )}
           <DetailItem icon={UsersIcon} label="Acompanhamento Profissional (Nutri, Médico)?" value={formatYesNoNotInformated(student.professionalFollowUp)} />
-          <DetailItem icon={TrendingUp} label="Estado de Saúde Atual" value={formatDisplayValue(student.currentHealthStatus, {excelente: "Excelente", bom: "Bom", regular: "Regular", ruim: "Ruim"})} />
+          <DetailItem icon={TrendingUp} label="Estado de Saúde Atual" value={formatDisplayValue(student.currentHealthStatus, currentHealthStatusMap)} />
 
           <SectionTitleDisplay icon={MessageCircle}>💬 Engajamento e Expectativa</SectionTitleDisplay>
           <DetailItem icon={Lightbulb} label="O que motiva a continuar treinando?" value={student.motivationSource} fullWidth />
@@ -195,8 +251,8 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
           <DetailItem icon={Smartphone} label="Gostaria de acompanhamento por app/mensagens?" value={formatYesNoNotInformated(student.wantsFollowUpApp)} />
           
           <SectionTitleDisplay icon={FileTextIcon}>🧾 Dados de Contrato (Opcional)</SectionTitleDisplay>
-          <DetailItem icon={BookOpen} label="Plano Contratado (Duração)" value={formatDisplayValue(student.contractPlan, {mensal: "Mensal", trimestral: "Trimestral", semestral: "Semestral", anual: "Anual"})} />
-          <DetailItem icon={CreditCard} label="Forma de Pagamento" value={formatDisplayValue(student.paymentMethod, {cartao_credito: "Cartão de Crédito", cartao_debito: "Cartão de Débito", pix: "Pix", boleto: "Boleto", dinheiro: "Dinheiro"})} />
+          <DetailItem icon={BookOpen} label="Plano Contratado (Duração)" value={formatDisplayValue(student.contractPlan, contractPlanMap)} />
+          <DetailItem icon={CreditCard} label="Forma de Pagamento" value={formatDisplayValue(student.paymentMethod, paymentMethodMap)} />
         </div>
       </CardContent>
     </Card>

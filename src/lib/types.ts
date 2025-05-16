@@ -13,10 +13,10 @@ export interface Student {
   attendance: AttendanceRecord[];
   missedClassesCount: number;
 
-  // Perguntas Pessoais (expansão)
+  // Informações Pessoais Detalhadas
   genderIdentity?: "feminino" | "masculino" | "outro_nao_informar" | "nao_informado";
   maritalStatus?: "solteiro" | "casado_uniao" | "divorciado" | "viuvo" | "nao_informado";
-  hasChildren?: "sim" | "nao" | "nao_informado"; // Já existente, mas agora agrupado aqui
+  hasChildren?: "sim" | "nao" | "nao_informado"; 
   occupation?: string;
   monthlyIncome?: "menos_1000" | "1000_2500" | "2500_5000" | "5000_10000" | "acima_10000" | "prefiro_nao_informar" | "nao_informado";
   educationLevel?: "fundamental_incompleto" | "fundamental_completo" | "medio_incompleto" | "medio_completo" | "superior_incompleto" | "superior_completo" | "pos_graduacao" | "nao_informado";
@@ -92,4 +92,3 @@ export interface DropoutPredictionResult {
   reasons: string[];
   recommendations: string[];
 }
-

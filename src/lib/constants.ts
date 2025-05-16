@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, ClipboardCheck } from 'lucide-react'; 
+import { LayoutDashboard, Users, FileText, ClipboardCheckIcon } from 'lucide-react'; 
 import type { Student, Survey, SurveyQuestion } from '@/lib/types';
 
 interface NavLink {
@@ -14,7 +14,7 @@ interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { href: '/dashboard', label: 'Painel', icon: LayoutDashboard, exact: true },
   { href: '/students', label: 'Alunos', icon: Users },
-  { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheck }, 
+  { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheckIcon }, 
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
 ];
 
@@ -178,4 +178,3 @@ export const MOCK_SURVEY: Survey = {
   description: 'Sua opinião é muito importante para nós! Por favor, dedique alguns minutos para responder a esta pesquisa e nos ajudar a melhorar nossos serviços.',
   questions: MOCK_SURVEY_QUESTIONS,
 };
-

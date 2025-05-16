@@ -36,10 +36,10 @@ const studentFormSchema = z.object({
   emergencyContactName: z.string().optional(),
   emergencyContactPhone: z.string().optional(),
   
-  // Novas informações pessoais
+  // Informações Pessoais Detalhadas
   genderIdentity: z.enum(["feminino", "masculino", "outro_nao_informar", "nao_informado"]).optional(),
   maritalStatus: z.enum(["solteiro", "casado_uniao", "divorciado", "viuvo", "nao_informado"]).optional(),
-  hasChildren: z.enum(["sim", "nao", "nao_informado"]).optional(), // Já existente
+  hasChildren: z.enum(["sim", "nao", "nao_informado"]).optional(),
   occupation: z.string().optional(),
   monthlyIncome: z.enum(["menos_1000", "1000_2500", "2500_5000", "5000_10000", "acima_10000", "prefiro_nao_informar", "nao_informado"]).optional(),
   educationLevel: z.enum(["fundamental_incompleto", "fundamental_completo", "medio_incompleto", "medio_completo", "superior_incompleto", "superior_completo", "pos_graduacao", "nao_informado"]).optional(),
@@ -294,7 +294,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="genderIdentity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Identidade de Gênero</FormLabel>
+                <FormLabel>Com qual identidade de gênero você se identifica?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -313,7 +313,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="maritalStatus"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estado Civil</FormLabel>
+                <FormLabel>Qual é o seu estado civil?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -330,10 +330,10 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
           />
           <FormField
             control={form.control}
-            name="hasChildren" // Já existente, só ajustando o label e posição
+            name="hasChildren" 
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Possui filhos ou dependentes?</FormLabel>
+                <FormLabel>Você possui filhos ou dependentes?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl>
                     <SelectTrigger>
@@ -355,8 +355,8 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="occupation"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Ocupação Atual</FormLabel>
-                <FormControl><Input placeholder="Ex: Estudante, Professor" {...field} /></FormControl>
+                <FormLabel>Qual é a sua ocupação atual?</FormLabel>
+                <FormControl><Input placeholder="Ex: estudante, professor" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -366,7 +366,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="monthlyIncome"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Renda Mensal Aproximada</FormLabel>
+                <FormLabel>Qual é a sua renda mensal aproximada?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -388,7 +388,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="educationLevel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nível de Escolaridade</FormLabel>
+                <FormLabel>Qual é o seu nível de escolaridade?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -412,7 +412,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="likesWinter"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gosta de Inverno?</FormLabel>
+                <FormLabel>Você gosta de inverno?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl>
                     <SelectTrigger>
@@ -439,7 +439,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="bestTrainingTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Melhor horário para frequentar?</FormLabel>
+                <FormLabel>Qual o melhor horário para você frequentar a academia?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -458,7 +458,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="daysPerWeek"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Quantos dias por semana pretende treinar?</FormLabel>
+                <FormLabel>Quantos dias por semana você pretende treinar?</FormLabel>
                 <FormControl><Input placeholder="Ex: 3 dias" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -469,7 +469,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="workSchedule"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Trabalha em turnos ou horários fixos?</FormLabel>
+                <FormLabel>Você trabalha em turnos ou tem horários fixos?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -489,7 +489,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="commuteTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tempo de deslocamento até a academia?</FormLabel>
+                <FormLabel>Quanto tempo leva da sua casa até a academia?</FormLabel>
                 <FormControl><Input placeholder="Ex: 15 minutos" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -504,14 +504,14 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="mainGoal"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Principal objetivo com a academia?</FormLabel>
+                <FormLabel>Qual seu principal objetivo com a academia?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "qualidade_vida"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
                     <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
                     <SelectItem value="massa_muscular">Ganho de massa muscular</SelectItem>
                     <SelectItem value="qualidade_vida">Qualidade de vida</SelectItem>
-                    <SelectItem value="reabilitacao">Reabilitação/condicionamento</SelectItem>
+                    <SelectItem value="reabilitacao">Reabilitação/condicionamento físico</SelectItem>
                     <SelectItem value="socializacao">Socialização</SelectItem>
                     <SelectItem value="outro">Outro</SelectItem>
                   </SelectContent>
@@ -538,7 +538,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="attendedGymBefore"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Já frequentou academia antes?</FormLabel>
+                <FormLabel>Já frequentou alguma academia antes?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -558,7 +558,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
                 name="previousGymDuration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Por quanto tempo permaneceu?</FormLabel>
+                    <FormLabel>Se sim, por quanto tempo permaneceu?</FormLabel>
                     <FormControl><Input placeholder="Ex: 1 ano" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -569,7 +569,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
                 name="reasonForLeavingPreviousGym"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Por que saiu da academia anterior?</FormLabel>
+                    <FormLabel>E por que saiu?</FormLabel>
                     <FormControl><Textarea placeholder="Descreva o motivo" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -582,7 +582,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="trainingDifficulties"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Já teve dificuldades em manter uma rotina de treinos? Quais?</FormLabel>
+                <FormLabel>Você já teve dificuldades em manter uma rotina de treinos? Quais?</FormLabel>
                 <FormControl><Textarea placeholder="Descreva as dificuldades" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -597,7 +597,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="medicalRestrictions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Possui alguma restrição médica?</FormLabel>
+                <FormLabel>Você possui alguma restrição médica para atividades físicas?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -628,7 +628,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="professionalFollowUp"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Faz acompanhamento profissional (nutri, médico)?</FormLabel>
+                <FormLabel>Está fazendo acompanhamento com nutricionista ou médico?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -692,7 +692,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="wantsFollowUpApp"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gostaria de acompanhamento por app/mensagens?</FormLabel>
+                <FormLabel>Você gostaria de receber acompanhamento por aplicativo ou mensagens motivacionais?</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -715,7 +715,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="contractPlan"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Plano Contratado (Duração)</FormLabel>
+                <FormLabel>Plano contratado:</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -735,7 +735,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="paymentMethod"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Forma de Pagamento</FormLabel>
+                <FormLabel>Forma de pagamento:</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
@@ -763,4 +763,3 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
     </Form>
   );
 }
-
