@@ -8,7 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { StudentForm } from '../../components/StudentForm'; // Adjusted path
 import type { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Edit3, User, Mail, Phone, Cake, Shield, هدف, Users as UsersIcon, CalendarDays } from 'lucide-react'; // هدف is placeholder for Goal, using UsersIcon for membership
+import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2 } from 'lucide-react'; 
+
+// Custom icon for "Metas de Fitness" as 'Target' or 'Goal' is not in Lucide. Using an inline SVG.
+const GoalIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12L12 22"></path><path d="M19 12H5"></path><path d="M12 12L18 6"></path><path d="M12 12L6 6"></path><path d="M12 2L12 12"></path></svg>
+);
+
 
 interface ProfileDetailsSectionProps {
   student: Student;
@@ -44,6 +50,12 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
       description: `Os dados de ${student.name} foram atualizados.`,
     });
   };
+
+  const formatYesNoNotInformated = (value?: "sim" | "nao" | "nao_informado") => {
+    if (value === "sim") return "Sim";
+    if (value === "nao") return "Não";
+    return "Não informado";
+  }
 
   return (
     <Card>
@@ -94,15 +106,27 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
           <DetailItem icon={CalendarDays} label="Data de Início" value={new Date(student.joinDate).toLocaleDateString('pt-BR')} />
           <DetailItem icon={UsersIcon} label="Tipo de Plano" value={student.membershipType} />
           <DetailItem icon={Shield} label="Contato de Emergência" value={`${student.emergencyContactName || ''} ${student.emergencyContactPhone || ''}`.trim() || undefined} />
+          <DetailItem icon={Snowflake} label="Gosta de Inverno?" value={formatYesNoNotInformated(student.likesWinter)} />
+          <DetailItem icon={UsersIcon} label="Tem Filhos?" value={formatYesNoNotInformated(student.hasChildren)} />
         </div>
 
         {student.fitnessGoals && (
           <div className="pt-4 border-t">
             <h3 className="text-lg font-semibold mb-2 text-primary flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M12 12L12 22"></path><path d="M19 12H5"></path><path d="M12 12L18 6"></path><path d="M12 12L6 6"></path><path d="M12 2L12 12"></path></svg>
-                Metas de Fitness
+                <GoalIcon />
+                <span className="ml-2">Metas de Fitness</span>
             </h3>
             <p className="text-foreground whitespace-pre-wrap">{student.fitnessGoals}</p>
+          </div>
+        )}
+
+        {student.previousGyms && (
+          <div className="pt-4 border-t">
+            <h3 className="text-lg font-semibold mb-2 text-primary flex items-center">
+                <Building2 className="mr-2 h-5 w-5" />
+                Treinou em Outras Academias?
+            </h3>
+            <p className="text-foreground whitespace-pre-wrap">{student.previousGyms}</p>
           </div>
         )}
       </CardContent>

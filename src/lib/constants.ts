@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, ClipboardCheck } from 'lucide-react'; // Ícone alterado de ScanLine
+import { LayoutDashboard, Users, FileText, ClipboardCheck } from 'lucide-react';
 import type { Student, Survey, SurveyQuestion } from '@/lib/types';
 
 interface NavLink {
@@ -40,6 +40,9 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-15', attended: true },
     ],
     missedClassesCount: 3,
+    likesWinter: "sim",
+    hasChildren: "nao",
+    previousGyms: "Academia Corpo em Forma (2 anos), SmartFit (6 meses)",
   },
   {
     id: '2',
@@ -58,6 +61,9 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-11', attended: true },
     ],
     missedClassesCount: 0,
+    likesWinter: "nao",
+    hasChildren: "sim",
+    previousGyms: "Nenhuma.",
   },
   {
     id: '3',
@@ -74,6 +80,9 @@ export const MOCK_STUDENTS: Student[] = [
        { date: '2024-07-10', attended: false },
     ],
     missedClassesCount: 4,
+    likesWinter: "nao_informado",
+    hasChildren: "nao_informado",
+    previousGyms: "Bluefit (1 ano)",
   }
 ];
 

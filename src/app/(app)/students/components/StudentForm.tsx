@@ -28,12 +28,15 @@ const studentFormSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres." }),
   email: z.string().email({ message: "Email inválido." }),
   phone: z.string().optional(),
-  dateOfBirth: z.string().optional(), // Consider using a date picker / proper validation
+  dateOfBirth: z.string().optional(),
   emergencyContactName: z.string().optional(),
   emergencyContactPhone: z.string().optional(),
   fitnessGoals: z.string().optional(),
   membershipType: z.enum(["Basico", "Premium", "Experimental"]),
-  joinDate: z.string().min(1, {message: "Data de início é obrigatória"}), // Consider using a date picker / proper validation
+  joinDate: z.string().min(1, {message: "Data de início é obrigatória"}),
+  likesWinter: z.enum(["sim", "nao", "nao_informado"]).optional(),
+  hasChildren: z.enum(["sim", "nao", "nao_informado"]).optional(),
+  previousGyms: z.string().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentFormSchema>;
@@ -55,6 +58,9 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       emergencyContactName: student.emergencyContactName || '',
       emergencyContactPhone: student.emergencyContactPhone || '',
       fitnessGoals: student.fitnessGoals || '',
+      likesWinter: student.likesWinter || "nao_informado",
+      hasChildren: student.hasChildren || "nao_informado",
+      previousGyms: student.previousGyms || "",
     } : {
       name: "",
       email: "",
@@ -65,6 +71,9 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       fitnessGoals: "",
       membershipType: "Basico",
       joinDate: new Date().toISOString().split('T')[0], // Default to today
+      likesWinter: "nao_informado",
+      hasChildren: "nao_informado",
+      previousGyms: "",
     },
   });
 
@@ -185,6 +194,50 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="likesWinter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gosta de Inverno?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma opção" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="hasChildren"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tem Filhos?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma opção" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <FormField
             control={form.control}
@@ -202,6 +255,23 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
                 <FormDescription>
                   Seja específico sobre os objetivos do aluno.
                 </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        <FormField
+            control={form.control}
+            name="previousGyms"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Já treinou em outras academias?</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Se sim, quais? Alguma observação?"
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

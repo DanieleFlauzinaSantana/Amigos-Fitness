@@ -12,6 +12,9 @@ export interface Student {
   profilePictureUrl?: string;
   attendance: AttendanceRecord[];
   missedClassesCount: number;
+  likesWinter?: "sim" | "nao" | "nao_informado";
+  hasChildren?: "sim" | "nao" | "nao_informado";
+  previousGyms?: string;
 }
 
 export interface AttendanceRecord {
@@ -52,3 +55,4 @@ export interface DropoutPredictionResult {
   reasons: string[];
   recommendations: string[];
 }
+
