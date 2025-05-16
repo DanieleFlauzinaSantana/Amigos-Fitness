@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { Student } from '@/lib/types';
-import { Fingerprint } from 'lucide-react'; // Ícone alterado
+import { Fingerprint } from 'lucide-react';
 
 interface StudentIdSectionProps {
   student: Student;

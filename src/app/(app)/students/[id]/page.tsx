@@ -1,3 +1,4 @@
+// src/app/(app)/students/[id]/page.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -7,7 +8,7 @@ import { ProfileDetailsSection } from './components/ProfileDetailsSection';
 import { AttendanceSection } from './components/AttendanceSection';
 import { DropoutPredictionSection } from './components/DropoutPredictionSection';
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
-import { QRCodeSection } from './components/QRCodeSection';
+import { StudentIdSection } from './components/StudentIdSection'; // Importação atualizada
 import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -131,7 +132,7 @@ export default function StudentDetailPage() {
           <AttendanceSection studentId={student.id} initialAttendance={student.attendance} onAttendanceUpdate={handleAttendanceUpdate}/>
         </div>
         <div className="lg:col-span-1 space-y-8">
-          <QRCodeSection student={student} />
+          <StudentIdSection student={student} /> {/* Componente atualizado */}
           <DropoutPredictionSection student={student} />
           <AbsenceNotificationSection student={student} />
         </div>

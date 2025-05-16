@@ -12,7 +12,7 @@ import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { ScanLine, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardCheck, CheckCircle, XCircle } from 'lucide-react'; // Ícone alterado de ScanLine
 
 export default function CheckinPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function CheckinPage() {
       toast({
         variant: 'destructive',
         title: 'Campo Obrigatório',
-        description: 'Por favor, insira o ID do aluno.',
+        description: 'Por favor, insira o Número de Inscrição do aluno.',
       });
       return;
     }
@@ -39,7 +39,7 @@ export default function CheckinPage() {
         toast({
           variant: 'destructive',
           title: 'Aluno Não Encontrado',
-          description: `Nenhum aluno encontrado com o ID: ${studentIdInput}.`,
+          description: `Nenhum aluno encontrado com o Número de Inscrição: ${studentIdInput}.`,
         });
         setIsLoading(false);
         return;
@@ -71,8 +71,6 @@ export default function CheckinPage() {
       const updatedStudent: Student = {
         ...student,
         attendance: updatedAttendance,
-        // Recalcular missedClassesCount pode ser complexo aqui sem mais contexto de como as faltas são atribuídas
-        // Por simplicidade, não vamos recalcular missedClassesCount aqui, mas em uma app real seria importante.
       };
 
       MOCK_STUDENTS[studentIndex] = updatedStudent;
@@ -87,32 +85,30 @@ export default function CheckinPage() {
         ),
       });
       
-      setStudentIdInput(''); // Limpar campo
+      setStudentIdInput(''); 
       setIsLoading(false);
-      // Opcionalmente, redirecionar: router.push(`/students/${student.id}`);
-
-    }, 700); // Simular latência da rede
+    }, 700); 
   };
 
   return (
     <div>
       <PageHeader 
-        title="Check-in por QR Code (Simulado)" 
-        description="Insira o ID do aluno (que seria lido de um QR Code) para registrar a presença."
+        title="Check-in por Número de Inscrição" 
+        description="Insira o Número de Inscrição do aluno para registrar a presença."
       />
       <Card className="max-w-md mx-auto">
         <CardHeader>
-          <CardTitle className="flex items-center"><ScanLine className="mr-2 h-6 w-6 text-primary" /> Registrar Presença</CardTitle>
+          <CardTitle className="flex items-center"><ClipboardCheck className="mr-2 h-6 w-6 text-primary" /> Registrar Presença</CardTitle>
           <CardDescription>
-            Após "ler" o QR Code do aluno, insira o ID abaixo.
+            Insira o Número de Inscrição do aluno abaixo.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="studentId">ID do Aluno</Label>
+            <Label htmlFor="studentId">Número de Inscrição do Aluno</Label>
             <Input
               id="studentId"
-              placeholder="Digite o ID do aluno"
+              placeholder="Digite o Número de Inscrição"
               value={studentIdInput}
               onChange={(e) => setStudentIdInput(e.target.value)}
               disabled={isLoading}
@@ -128,7 +124,7 @@ export default function CheckinPage() {
             )}
           </Button>
            <p className="text-xs text-center text-muted-foreground pt-4">
-            Esta página simula a leitura de um QR Code. Em uma implementação real, um leitor de QR Code preencheria o ID do aluno automaticamente.
+            Esta página permite o registro de presença usando o Número de Inscrição único de cada aluno.
           </p>
         </CardContent>
       </Card>
