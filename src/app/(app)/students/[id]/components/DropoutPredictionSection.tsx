@@ -26,15 +26,24 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
     const getAnswerValue = (questionId: string): SurveyAnswer | undefined => 
       student.latestSurveyResponse?.answers.find(a => a.questionId === questionId);
 
+    // Mapeia as respostas da pesquisa para os campos esperados pela IA
+    // Conforme definido em src/ai/flows/predict-dropout.ts e src/lib/types.ts (SurveyFeedbackForAI)
+    
     const q1 = getAnswerValue('q1_satisfaction'); // Satisfação Geral
     if (q1 && typeof q1.value === 'number') feedback.overallSatisfaction = q1.value;
     
     const q2 = getAnswerValue('q2_recommend'); // Recomendaria
-    if (q2) feedback.wouldRecommend = String(q2.value); // 'sim' ou 'nao'
+    if (q2 && (String(q2.value).toLowerCase() === 'sim' || String(q2.value).toLowerCase() === 'não' || String(q2.value).toLowerCase() === 'nao')) {
+      feedback.wouldRecommend = String(q2.value).toLowerCase() as "sim" | "nao";
+    }
     
     const q3 = getAnswerValue('q3_comments'); // Comentários
     if (q3 && typeof q3.value === 'string') feedback.comments = q3.value;
     
+    // Para as novas perguntas, elas não são diretamente mapeadas para SurveyFeedbackForAI
+    // pois a IA foi instruída a usar principalmente as 3 acima.
+    // No entanto, elas estão disponíveis no `student.latestSurveyResponse.answers` se necessário para outras análises.
+
     return Object.keys(feedback).length > 0 ? feedback : undefined;
   };
 
@@ -55,6 +64,8 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
         age: student.dateOfBirth ? new Date().getFullYear() - new Date(student.dateOfBirth).getFullYear() : 30, 
         fitnessGoals: student.mainGoal || "Não especificado",
         membershipType: student.membershipType,
+        // Adicionar engagementLevel se o tivermos ou se a IA precisar
+        // engagementLevel: student.engagementLevel || "Não informado"
       },
       surveyFeedback: surveyFeedback,
     };
