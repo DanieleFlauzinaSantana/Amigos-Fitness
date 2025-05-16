@@ -6,6 +6,8 @@ import type { Survey, SurveyQuestion, SurveyAnswer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Star, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
+import * as React from 'react';
+
 
 interface SimulatedSurveyResultsProps {
   survey: Survey;
@@ -65,8 +67,8 @@ export function SimulatedSurveyResults({ survey }: SimulatedSurveyResultsProps) 
     }
 
     if (question.type === 'yes-no') {
-      const yesCount = questionAnswers.filter(a => a === 'sim').length;
-      const noCount = questionAnswers.filter(a => a === 'nao').length;
+      const yesCount = questionAnswers.filter(a => String(a).toLowerCase() === 'sim').length;
+      const noCount = questionAnswers.filter(a => String(a).toLowerCase() === 'nao').length;
       const data = [
         { name: 'Sim', value: yesCount, icon: <CheckCircle className="h-4 w-4 text-green-500 inline-block mr-1"/> },
         { name: 'Não', value: noCount, icon: <XCircle className="h-4 w-4 text-red-500 inline-block mr-1"/> },
@@ -100,7 +102,7 @@ export function SimulatedSurveyResults({ survey }: SimulatedSurveyResultsProps) 
               <CardDescription>Tipo: {result.display}</CardDescription>
             </CardHeader>
             <CardContent>
-              {result.type === 'rating' && (
+              {result.type === 'rating' && result.counts && (
                 <div>
                   <p className="mb-2">Média de Avaliação: <strong>{result.average} / 5</strong></p>
                   <ResponsiveContainer width="100%" height={200}>

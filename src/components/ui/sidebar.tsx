@@ -280,7 +280,7 @@ const SidebarTrigger = React.forwardRef<
       {...props}
     >
       <PanelLeft />
-      <span className="sr-only">Alternar Barra Lateral</span>
+      <span className="sr-only">Alternar barra lateral</span>
     </Button>
   )
 })

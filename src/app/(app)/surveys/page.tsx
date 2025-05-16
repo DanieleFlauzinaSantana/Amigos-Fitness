@@ -14,10 +14,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Image from "next/image";
+import { useEffect, useState } from 'react';
 
 
 export default function SurveysPage() {
-  const survey = MOCK_SURVEY; // Usando a pesquisa mockada
+  const survey = MOCK_SURVEY; 
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const surveySubmitLink = origin ? `${origin}/surveys/${survey.id}/submit` : `/surveys/${survey.id}/submit`;
+
 
   return (
     <div>
@@ -59,8 +70,8 @@ export default function SurveysPage() {
                 <p className="text-sm text-muted-foreground">
                     Use o link abaixo para que os alunos respondam à pesquisa. Você pode adicionar o ID do aluno ao final do link para pré-identificação (ex: `?studentId=ALUNO_ID`).
                 </p>
-                <Link href={`/surveys/${survey.id}/submit`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-1 block">
-                    {`${window.location.origin}/surveys/${survey.id}/submit`}
+                <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-1 block">
+                    {surveySubmitLink}
                 </Link>
             </div>
              <Image 
@@ -74,7 +85,7 @@ export default function SurveysPage() {
           </CardContent>
           <CardFooter>
             <Button asChild className="w-full md:w-auto">
-              <Link href={`/surveys/${survey.id}/submit`} target="_blank" rel="noopener noreferrer">
+              <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer">
                 <Send className="mr-2 h-4 w-4" /> Abrir Formulário da Pesquisa
               </Link>
             </Button>

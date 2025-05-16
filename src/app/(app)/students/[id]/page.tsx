@@ -11,7 +11,7 @@ import { DropoutPredictionSection } from './components/DropoutPredictionSection'
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
 import { StudentIdSection } from './components/StudentIdSection';
 import { StudentSurveyResponseSection } from './components/StudentSurveyResponseSection'; // Restaurado
-import { MOCK_STUDENTS } from '@/lib/constants';
+import { MOCK_STUDENTS, MOCK_SURVEY } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -19,10 +19,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { calculateConsecutiveAbsences } from '@/lib/utils';
 import { ABSENCE_THRESHOLD } from '@/lib/config';
-// Removido Link e Card de Google Forms
 
 const CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK = 5;
-// Removido GOOGLE_FORM_LINK_FOR_STUDENTS
 
 
 export default function StudentDetailPage() {
@@ -33,7 +31,6 @@ export default function StudentDetailPage() {
 
   const [student, setStudent] = useState<Student | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // const [previousMissedCount, setPreviousMissedCount] = useState<number | null>(null); // Não parece ser usado
 
 
   useEffect(() => {
@@ -43,7 +40,6 @@ export default function StudentDetailPage() {
         const foundStudent = MOCK_STUDENTS.find(s => s.id === studentId);
         if (foundStudent) {
           setStudent(foundStudent);
-          // setPreviousMissedCount(foundStudent.missedClassesCount); // Não parece ser usado
         } else {
           router.push('/students'); 
         }
@@ -87,11 +83,11 @@ export default function StudentDetailPage() {
           description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. Considere enviar o link da pesquisa de satisfação.`,
           variant: "default",
           duration: 7000,
-          action: ( // Ação agora abre o link da pesquisa interna
+          action: (
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => router.push(`/surveys/${student.latestSurveyResponse?.surveyId || 'survey1'}/submit?studentId=${student.id}`)}
+              onClick={() => router.push(`/surveys/${MOCK_SURVEY.id}/submit?studentId=${student.id}`)}
             >
               Abrir Pesquisa
             </Button>
@@ -145,7 +141,7 @@ export default function StudentDetailPage() {
           <StudentIdSection student={student} />
           <DropoutPredictionSection student={student} />
           <AbsenceNotificationSection student={student} />
-          <StudentSurveyResponseSection student={student} /> {/* Restaurado */}
+          <StudentSurveyResponseSection student={student} />
         </div>
       </div>
     </div>

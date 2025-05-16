@@ -47,7 +47,7 @@ export interface Student {
   profilePictureUrl?: string;
   attendance: AttendanceRecord[];
   missedClassesCount: number;
-  latestSurveyResponse?: SurveyResponse; // Restaurado
+  latestSurveyResponse?: SurveyResponse;
 
   // Informações Pessoais Detalhadas
   genderIdentity?: "feminino" | "masculino" | "outro_nao_informar" | "nao_informado";
@@ -64,7 +64,7 @@ export interface Student {
   workSchedule?: "turnos" | "fixos" | "flexivel" | "nao_trabalha" | "nao_informado";
   commuteTime?: string; 
 
-  mainGoal?: "emagrecimento" | "massa_muscular" | "qualidade_vida" | "reabilitacao" | "socializacao" | "outro";
+  mainGoal?: "emagrecimento" | "massa_muscular" | "qualidade_vida" | "reabilitacao" | "socializacao" | "outro" | "nao_informado";
   otherGoalDetail?: string; 
   attendedGymBefore?: "sim" | "nao" | "nao_informado";
   previousGymDuration?: string; 

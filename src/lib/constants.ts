@@ -16,12 +16,12 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/students', label: 'Alunos', icon: Users },
   { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheckIcon },
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
-  // { href: '/settings', label: 'Configurações', icon: Settings }, // Removido daqui
+  // { href: '/settings', label: 'Configurações', icon: Settings }, // Removido do menu principal, mas acessível pelo rodapé do sidebar
 ];
 
 export const MOCK_SURVEY: Survey = {
   id: 'survey1',
-  title: 'Pesquisa de Satisfação da Academia Amigos Fitness',
+  title: 'Pesquisa de Satisfação da Amigos Fitness',
   description: 'Seu feedback é muito importante para nós! Responda às perguntas abaixo.',
   questions: [
     { id: 'q1', text: 'Qual seu nível de satisfação geral com a academia (1 a 5 estrelas)?', type: 'rating' },

@@ -54,7 +54,7 @@ const studentFormSchema = z.object({
   commuteTime: z.string().optional(),
 
   // MOTIVAÇÃO E OBJETIVOS
-  mainGoal: z.enum(["emagrecimento", "massa_muscular", "qualidade_vida", "reabilitacao", "socializacao", "outro"]).optional(),
+  mainGoal: z.enum(["emagrecimento", "massa_muscular", "qualidade_vida", "reabilitacao", "socializacao", "outro", "nao_informado"]).optional(),
   otherGoalDetail: z.string().optional(),
   attendedGymBefore: z.enum(["sim", "nao", "nao_informado"]).optional(),
   previousGymDuration: z.string().optional(),
@@ -110,7 +110,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       daysPerWeek: student.daysPerWeek || "",
       workSchedule: student.workSchedule || "nao_informado",
       commuteTime: student.commuteTime || "",
-      mainGoal: student.mainGoal || "qualidade_vida",
+      mainGoal: student.mainGoal || "nao_informado",
       otherGoalDetail: student.otherGoalDetail || "",
       attendedGymBefore: student.attendedGymBefore || "nao_informado",
       previousGymDuration: student.previousGymDuration || "",
@@ -145,7 +145,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       daysPerWeek: "",
       workSchedule: "nao_informado",
       commuteTime: "",
-      mainGoal: "qualidade_vida",
+      mainGoal: "nao_informado",
       otherGoalDetail: "",
       attendedGymBefore: "nao_informado",
       previousGymDuration: "",
@@ -505,7 +505,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Qual seu principal objetivo com a academia?</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value || "qualidade_vida"}>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                   <SelectContent>
                     <SelectItem value="emagrecimento">Emagrecimento</SelectItem>
@@ -514,6 +514,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
                     <SelectItem value="reabilitacao">Reabilitação/condicionamento físico</SelectItem>
                     <SelectItem value="socializacao">Socialização</SelectItem>
                     <SelectItem value="outro">Outro</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

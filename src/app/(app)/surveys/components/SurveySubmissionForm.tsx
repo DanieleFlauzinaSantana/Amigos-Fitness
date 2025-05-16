@@ -62,8 +62,8 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
     if (studentId) {
         const studentIndex = MOCK_STUDENTS.findIndex(s => s.id === studentId);
         if (studentIndex !== -1) {
-            // MOCK_STUDENTS[studentIndex].latestSurveyResponse = submissionData; // Isso não funciona como esperado com useState em nível de app.
-            console.log(`Simulação: Resposta da pesquisa seria associada ao aluno ${MOCK_STUDENTS[studentIndex].name}`);
+            MOCK_STUDENTS[studentIndex].latestSurveyResponse = submissionData;
+            console.log(`Simulação: Resposta da pesquisa associada ao aluno ${MOCK_STUDENTS[studentIndex].name}`);
         }
     }
 
