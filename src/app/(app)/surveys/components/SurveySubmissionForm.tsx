@@ -172,4 +172,3 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
     </Card>
   );
 }
-
