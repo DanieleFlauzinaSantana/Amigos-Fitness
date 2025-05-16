@@ -26,7 +26,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Simula o logout redirecionando para a página de login
     router.push('/login');
   };
 
@@ -70,7 +69,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex flex-col space-y-1">
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" asChild>
+             {/* O botão de Configurações pode ser adicionado aqui se desejado no rodapé */}
+             <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" asChild>
               <Link href="/settings">
                 <Settings className="mr-2 h-4 w-4" /> Configurações
               </Link>

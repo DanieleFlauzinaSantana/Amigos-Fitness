@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, ClipboardCheckIcon, Settings } from 'lucide-react'; 
+import { LayoutDashboard, Users, FileText, ClipboardCheckIcon, Settings } from 'lucide-react';
 import type { Student, Survey, SurveyResponse, SurveyFeedbackForAI } from '@/lib/types';
 
 interface NavLink {
@@ -14,9 +14,9 @@ interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { href: '/dashboard', label: 'Painel', icon: LayoutDashboard, exact: true },
   { href: '/students', label: 'Alunos', icon: Users },
-  { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheckIcon }, 
+  { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheckIcon },
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
-  { href: '/settings', label: 'Configurações', icon: Settings },
+  // { href: '/settings', label: 'Configurações', icon: Settings }, // Removido daqui
 ];
 
 export const MOCK_SURVEY: Survey = {
@@ -68,16 +68,16 @@ export const MOCK_STUDENTS: Student[] = [
     ],
     missedClassesCount: 3,
     latestSurveyResponse: anaSilvaSurveyResponse,
-    
+
     genderIdentity: "feminino",
     maritalStatus: "solteiro",
     hasChildren: "nao",
     occupation: "Designer Gráfica",
     monthlyIncome: "2500_5000",
     educationLevel: "superior_completo",
-    
+
     likesWinter: "sim",
-    
+
     bestTrainingTime: "manha",
     daysPerWeek: "3-4",
     workSchedule: "flexivel",
@@ -114,6 +114,7 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-11', attended: true },
     ],
     missedClassesCount: 0,
+    latestSurveyResponse: undefined,
 
     genderIdentity: "masculino",
     maritalStatus: "casado_uniao",
@@ -121,7 +122,7 @@ export const MOCK_STUDENTS: Student[] = [
     occupation: "Engenheiro de Software",
     monthlyIncome: "acima_10000",
     educationLevel: "pos_graduacao",
-    
+
     likesWinter: "nao",
 
     bestTrainingTime: "noite",
@@ -159,6 +160,7 @@ export const MOCK_STUDENTS: Student[] = [
        { date: '2024-07-10', attended: false },
     ],
     missedClassesCount: 4,
+    latestSurveyResponse: undefined,
 
     genderIdentity: "outro_nao_informar",
     maritalStatus: "divorciado",
