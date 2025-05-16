@@ -59,9 +59,14 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
     console.log("Submitting survey:", submissionData);
 
     // Simulação: Se studentId existir, tentar atualizar o MOCK_STUDENTS (isso não persistirá na realidade sem backend)
+    // Em uma aplicação real, aqui você enviaria os dados para um backend.
+    // Por ora, apenas simulamos que a resposta foi associada se studentId for fornecido
     if (studentId) {
         const studentIndex = MOCK_STUDENTS.findIndex(s => s.id === studentId);
         if (studentIndex !== -1) {
+            // Para que a IA use esse dado, precisaríamos de uma forma de atualizar o estado global
+            // ou recarregar os dados do aluno. Por enquanto, essa atualização é apenas local no MOCK_STUDENTS
+            // e não persistirá entre navegações sem um backend ou estado global (como Zustand/Redux).
             MOCK_STUDENTS[studentIndex].latestSurveyResponse = submissionData;
             console.log(`Simulação: Resposta da pesquisa associada ao aluno ${MOCK_STUDENTS[studentIndex].name}`);
         }
@@ -76,6 +81,7 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
     });
     setIsLoading(false);
     
+    // Redireciona para a página do aluno se um ID foi fornecido, caso contrário, para a página de pesquisas.
     router.push(studentId ? `/students/${studentId}` : '/surveys');
   };
 
@@ -92,7 +98,7 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
                 variant={currentValue === rate ? 'default' : 'outline'}
                 size="icon"
                 onClick={() => handleInputChange(question.id, rate)}
-                className="rounded-full h-8 w-8 sm:h-10 sm:w-10" // Tamanho ajustado
+                className="rounded-full h-8 w-8 sm:h-10 sm:w-10" 
                 aria-label={`Avaliação ${rate} de 5`}
               >
                 <Star className={`h-4 w-4 sm:h-5 sm:w-5 ${currentValue === rate || (typeof currentValue === 'number' && currentValue >= rate) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />

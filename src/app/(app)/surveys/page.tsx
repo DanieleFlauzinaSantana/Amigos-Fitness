@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Edit, Send } from "lucide-react";
+import { FileText, Edit, Send, BarChart3 } from "lucide-react"; // BarChart3 importado
 import { MOCK_SURVEY } from "@/lib/constants";
 import {
   Tooltip,
@@ -28,6 +28,7 @@ export default function SurveysPage() {
   }, []);
 
   const surveySubmitLink = origin ? `${origin}/surveys/${survey.id}/submit` : `/surveys/${survey.id}/submit`;
+  const surveyResultsLink = `/surveys/${survey.id}/results`;
 
 
   return (
@@ -52,6 +53,12 @@ export default function SurveysPage() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                <Button variant="outline" size="icon" asChild>
+                  <Link href={surveyResultsLink}>
+                    <BarChart3 className="h-4 w-4" />
+                    <span className="sr-only">Ver Respostas (Simulado)</span>
+                  </Link>
+                </Button>
               </div>
             </div>
             <CardDescription>

@@ -10,7 +10,7 @@ import { AttendanceSection } from './components/AttendanceSection';
 import { DropoutPredictionSection } from './components/DropoutPredictionSection';
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
 import { StudentIdSection } from './components/StudentIdSection';
-import { StudentSurveyResponseSection } from './components/StudentSurveyResponseSection'; // Restaurado
+import { StudentSurveyResponseSection } from './components/StudentSurveyResponseSection';
 import { MOCK_STUDENTS, MOCK_SURVEY } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -77,7 +77,7 @@ export default function StudentDetailPage() {
       }
 
       const consecutiveAbsences = calculateConsecutiveAbsences(updatedStudentData.attendance);
-      if (consecutiveAbsences >= CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK) {
+      if (consecutiveAbsences >= CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK && !student.latestSurveyResponse) { // Adicionado cheque para evitar spam de toast se já respondeu
          toast({
           title: "Lembrete de Envio de Pesquisa (Simulação)",
           description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. Considere enviar o link da pesquisa de satisfação.`,

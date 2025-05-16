@@ -33,9 +33,7 @@ export default function SurveySubmitPage() {
   }
 
   return (
-    <div className="container mx-auto"> {/* Removido py-8 px-4 para dar espaço ao form */}
-      {/* O PageHeader pode ser removido se o título estiver no Card do formulário */}
-      {/* <PageHeader title={surveyToSubmit.title} description={surveyToSubmit.description} /> */}
+    <div className="container mx-auto">
       <SurveySubmissionForm survey={surveyToSubmit} studentId={studentId} />
     </div>
   );
