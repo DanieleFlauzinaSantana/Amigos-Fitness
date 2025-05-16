@@ -55,7 +55,7 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Aluno
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-[625px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Aluno</DialogTitle>
           <DialogDescription>

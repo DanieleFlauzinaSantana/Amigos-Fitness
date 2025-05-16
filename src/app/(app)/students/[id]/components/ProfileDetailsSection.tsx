@@ -71,7 +71,7 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
               <span className="sr-only">Editar Perfil</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[625px]">
+          <DialogContent className="sm:max-w-[625px] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Editar Perfil de {student.name}</DialogTitle>
             </DialogHeader>
