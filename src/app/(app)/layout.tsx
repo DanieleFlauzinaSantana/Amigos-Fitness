@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/lib/constants";
 import { Dumbbell, LogOut, Settings, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Importar Tooltip
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -60,7 +61,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter className="p-4 border-t border-sidebar-border space-y-3">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="admin avatar" />
+              <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="admin avatar"/>
               <AvatarFallback>AF</AvatarFallback>
             </Avatar>
             <div>
@@ -69,14 +70,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex flex-col space-y-1">
-             <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" asChild>
-              <Link href="/settings">
-                <Settings className="mr-2 h-4 w-4" /> Configurações
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" /> Sair
-            </Button>
+             <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" asChild>
+                      <Link href="/settings">
+                        <Settings className="mr-2 h-4 w-4" /> Configurações
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center" className="bg-sidebar-accent text-sidebar-accent-foreground">
+                    <p>Acessar configurações do sistema</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" /> Sair
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center" className="bg-sidebar-accent text-sidebar-accent-foreground">
+                    <p>Encerrar sessão e voltar para tela de login</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
           </div>
         </SidebarFooter>
       </Sidebar>
