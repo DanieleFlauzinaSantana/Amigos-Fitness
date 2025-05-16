@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function DashboardPage() {
   return (
     <div>
-      <PageHeader title="Dashboard" description="Bem-vindo à Academia Inteligente!" />
+      <PageHeader title="Painel" description="Bem-vindo à Academia Inteligente!" />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -53,7 +53,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter className="p-4 border-t border-sidebar-border">
            {/* Placeholder for user profile/settings if needed later */}
            <div className="flex items-center gap-3 mb-4">
-            <Image src="https://placehold.co/40x40.png" alt="User Avatar" data-ai-hint="user avatar" width={40} height={40} className="rounded-full" />
+            <Image src="https://placehold.co/40x40.png" alt="Avatar do Usuário" data-ai-hint="user avatar" width={40} height={40} className="rounded-full" />
             <div>
               <p className="text-sm font-medium text-sidebar-foreground">Usuário Admin</p>
               <p className="text-xs text-sidebar-foreground/70">admin@example.com</p>

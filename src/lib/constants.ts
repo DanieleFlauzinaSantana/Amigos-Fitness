@@ -11,7 +11,7 @@ interface NavLink {
 }
 
 export const NAV_LINKS: NavLink[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard', label: 'Painel', icon: LayoutDashboard, exact: true },
   { href: '/students', label: 'Alunos', icon: Users },
   { href: '/checkin', label: 'Check-in por QR Code', icon: ScanLine }, // Novo link
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
