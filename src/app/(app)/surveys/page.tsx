@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -19,8 +20,10 @@ export default function SurveysPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl flex items-center"><FileText className="mr-2 h-5 w-5 text-primary"/>{MOCK_SURVEY.title}</CardTitle>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm"><Edit className="mr-1 h-3 w-3" /> Editar</Button>
-                <Button variant="outline" size="sm"><BarChart2 className="mr-1 h-3 w-3" /> Ver Respostas</Button>
+                <Button variant="outline" size="sm" disabled title="Edição no código (constants.ts)"><Edit className="mr-1 h-3 w-3" /> Editar Perguntas</Button>
+                <Link href={`/surveys/${MOCK_SURVEY.id}/results`} passHref>
+                  <Button variant="outline" size="sm"><BarChart2 className="mr-1 h-3 w-3" /> Ver Respostas (Simulado)</Button>
+                </Link>
               </div>
             </div>
             <CardDescription>{MOCK_SURVEY.description}</CardDescription>
@@ -30,7 +33,7 @@ export default function SurveysPage() {
               <h3 className="font-semibold mb-1">Detalhes da Pesquisa:</h3>
               <p className="text-sm text-muted-foreground">ID: {MOCK_SURVEY.id}</p>
               <p className="text-sm text-muted-foreground">Número de Questões: {MOCK_SURVEY.questions.length}</p>
-              <p className="text-sm text-muted-foreground mt-2">Esta pesquisa ajuda a entender a satisfação geral dos alunos com os serviços e instalações da Amigos Fitness.</p> {/* Atualizado aqui */}
+              <p className="text-sm text-muted-foreground mt-2">Esta pesquisa ajuda a entender a satisfação geral dos alunos com os serviços e instalações da Amigos Fitness.</p>
             </div>
             <Image 
               src="https://placehold.co/200x150.png" 

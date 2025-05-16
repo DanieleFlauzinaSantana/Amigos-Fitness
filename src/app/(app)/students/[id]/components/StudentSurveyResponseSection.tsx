@@ -3,9 +3,11 @@
 
 import type { Student, SurveyAnswer } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Star, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileText, Star, MessageSquare, Copy, Send } from 'lucide-react';
 import { MOCK_SURVEY } from '@/lib/constants'; // Para buscar os textos das perguntas
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 interface StudentSurveyResponseSectionProps {
   student: Student;
@@ -35,6 +37,17 @@ const formatAnswerValue = (answer: SurveyAnswer): string | React.ReactNode => {
 
 export function StudentSurveyResponseSection({ student }: StudentSurveyResponseSectionProps) {
   const { latestSurveyResponse } = student;
+  const { toast } = useToast();
+
+  const surveyLinkForStudent = `${window.location.origin}/surveys/${MOCK_SURVEY.id}/submit?studentId=${student.id}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(surveyLinkForStudent);
+    toast({
+      title: 'Link Copiado!',
+      description: 'O link da pesquisa para este aluno foi copiado para a área de transferência.',
+    });
+  };
 
   if (!latestSurveyResponse) {
     return (
@@ -45,12 +58,21 @@ export function StudentSurveyResponseSection({ student }: StudentSurveyResponseS
           </CardTitle>
           <CardDescription>O aluno ainda não respondeu nenhuma pesquisa.</CardDescription>
         </CardHeader>
-        <CardContent>
-           <Link href={`/surveys/${MOCK_SURVEY.id}/submit?studentId=${student.id}`} passHref>
-             <span className="text-sm text-primary hover:underline">
-                Enviar link da pesquisa para este aluno (simulado)
-             </span>
-          </Link>
+        <CardContent className="space-y-3">
+           <p className="text-sm text-muted-foreground">
+            Envie o link abaixo para o aluno responder:
+           </p>
+           <div className="flex items-center space-x-2">
+            <Link href={surveyLinkForStudent} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-grow">
+                {surveyLinkForStudent}
+            </Link>
+            <Button variant="outline" size="icon" onClick={handleCopyLink} title="Copiar link">
+                <Copy className="h-4 w-4" />
+            </Button>
+           </div>
+            <Button onClick={() => window.open(surveyLinkForStudent, '_blank')} size="sm" className="w-full">
+                <Send className="mr-2 h-4 w-4" /> Abrir Link da Pesquisa (Simular Envio)
+            </Button>
         </CardContent>
       </Card>
     );
@@ -76,9 +98,9 @@ export function StudentSurveyResponseSection({ student }: StudentSurveyResponseS
           </div>
         ))}
          <Link href={`/surveys/${survey.id}/submit?studentId=${student.id}`} passHref>
-             <span className="text-sm text-primary hover:underline">
+             <Button variant="link" className="p-0 h-auto text-sm">
                 Ver/Editar resposta (simulado) ou Enviar novamente
-             </span>
+             </Button>
           </Link>
       </CardContent>
     </Card>
