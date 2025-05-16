@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, ClipboardCheckIcon } from 'lucide-react'; 
-import type { Student, Survey, SurveyResponse } from '@/lib/types';
+import { LayoutDashboard, Users, FileText, ClipboardCheckIcon, Settings } from 'lucide-react'; 
+import type { Student, Survey, SurveyResponse, SurveyFeedbackForAI } from '@/lib/types';
 
 interface NavLink {
   href: string;
@@ -16,6 +16,7 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/students', label: 'Alunos', icon: Users },
   { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheckIcon }, 
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
+  { href: '/settings', label: 'Configurações', icon: Settings },
 ];
 
 export const MOCK_SURVEY: Survey = {
@@ -43,7 +44,6 @@ export const anaSilvaSurveyResponse: SurveyResponse = {
     { questionId: 'q5', value: 'Gostaria de mais aulas de Zumba às sextas-feiras!' }, // Comentário
   ],
 };
-
 
 export const MOCK_STUDENTS: Student[] = [
   {
@@ -114,7 +114,6 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-11', attended: true },
     ],
     missedClassesCount: 0,
-    // latestSurveyResponse: undefined,
 
     genderIdentity: "masculino",
     maritalStatus: "casado_uniao",
@@ -160,7 +159,6 @@ export const MOCK_STUDENTS: Student[] = [
        { date: '2024-07-10', attended: false },
     ],
     missedClassesCount: 4,
-    // latestSurveyResponse: undefined,
 
     genderIdentity: "outro_nao_informar",
     maritalStatus: "divorciado",
