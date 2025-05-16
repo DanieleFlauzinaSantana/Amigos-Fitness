@@ -52,23 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4 border-t border-sidebar-border">
-           <div className="flex items-center gap-3 mb-4">
-            <Image src="https://placehold.co/40x40.png" alt="Avatar do Administrador" data-ai-hint="user avatar" width={40} height={40} className="rounded-full" />
-            <div>
-              <p className="text-sm font-medium text-sidebar-foreground">Admin</p>
-              <p className="text-xs text-sidebar-foreground/70">danielesoudapaz@hotmail.com</p>
-            </div>
-          </div>
-          <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" asChild>
-            <Link href="/settings">
-              <Settings className="mr-2 h-4 w-4" />
-              Configurações
-            </Link>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sair
-          </Button>
+           {/* Conteúdo do rodapé removido conforme solicitado */}
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
