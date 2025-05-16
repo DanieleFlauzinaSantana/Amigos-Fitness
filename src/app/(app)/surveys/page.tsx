@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Edit, BarChart2, Send } from "lucide-react";
+import { FileText, Edit, Send } from "lucide-react";
 import { MOCK_SURVEY } from "@/lib/constants";
 import {
   Tooltip,
@@ -43,21 +43,15 @@ export default function SurveysPage() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      {/* Botão de editar desabilitado, edição é feita no código */}
                       <Button variant="outline" size="icon" disabled> 
                         <Edit className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Edição no código (constants.ts)</p>
+                      <p>Edição das perguntas é feita no código (src/lib/constants.ts)</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <Button variant="outline" size="icon" asChild>
-                  <Link href={`/surveys/${survey.id}/results`}>
-                    <BarChart2 className="h-4 w-4" />
-                  </Link>
-                </Button>
               </div>
             </div>
             <CardDescription>
@@ -68,11 +62,12 @@ export default function SurveysPage() {
             <div className="flex-1">
                 <h3 className="font-semibold mb-1">Link para Responder:</h3>
                 <p className="text-sm text-muted-foreground">
-                    Use o link abaixo para que os alunos respondam à pesquisa. Você pode adicionar o ID do aluno ao final do link para pré-identificação (ex: `?studentId=ALUNO_ID`).
+                    Use o link abaixo para que os alunos respondam à pesquisa. Para associar a resposta a um aluno específico (e usar na IA), adicione `?studentId=ID_DO_ALUNO` ao final do link.
                 </p>
                 <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-1 block">
                     {surveySubmitLink}
                 </Link>
+                 <p className="text-xs text-muted-foreground mt-2">Exemplo com ID do aluno: {`${surveySubmitLink}?studentId=ALUNO_ID_AQUI`}</p>
             </div>
              <Image 
               src="https://placehold.co/200x150.png" 
