@@ -26,20 +26,14 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
     const getAnswerValue = (questionId: string): SurveyAnswer | undefined => 
       student.latestSurveyResponse?.answers.find(a => a.questionId === questionId);
 
-    const q1 = getAnswerValue('q1'); // Satisfação Geral
+    const q1 = getAnswerValue('q1_satisfaction'); // Satisfação Geral
     if (q1 && typeof q1.value === 'number') feedback.overallSatisfaction = q1.value;
     
-    const q2 = getAnswerValue('q2'); // Limpeza
-    if (q2 && typeof q2.value === 'number') feedback.facilityCleanliness = q2.value;
-
-    const q3 = getAnswerValue('q3'); // Equipamentos
-    if (q3) feedback.equipmentSatisfaction = String(q3.value);
+    const q2 = getAnswerValue('q2_recommend'); // Recomendaria
+    if (q2) feedback.wouldRecommend = String(q2.value); // 'sim' ou 'nao'
     
-    const q4 = getAnswerValue('q4'); // Recomendaria
-    if (q4 && typeof q4.value === 'number') feedback.likelyToRecommend = q4.value;
-
-    const q5 = getAnswerValue('q5'); // Comentários
-    if (q5 && typeof q5.value === 'string') feedback.comments = q5.value;
+    const q3 = getAnswerValue('q3_comments'); // Comentários
+    if (q3 && typeof q3.value === 'string') feedback.comments = q3.value;
     
     return Object.keys(feedback).length > 0 ? feedback : undefined;
   };

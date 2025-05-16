@@ -1,6 +1,6 @@
 
 export interface SurveyQuestion {
-  id: string; // e.g., "q1", "q2"
+  id: string; // e.g., "q1_satisfaction", "q2_recommend"
   text: string;
   type: 'rating' | 'text' | 'multiple-choice' | 'yes-no';
   options?: string[]; // For multiple-choice
@@ -15,7 +15,7 @@ export interface Survey {
 
 export interface SurveyAnswer {
   questionId: string;
-  value: string | number; // Could be number for rating, string for text/multiple-choice
+  value: string | number; // Could be number for rating, string for text/multiple-choice/yes-no
 }
 
 export interface SurveyResponse {
@@ -26,12 +26,11 @@ export interface SurveyResponse {
 }
 
 // This can be part of the Student interface or a separate structure
+// Adjusted to reflect simplified survey questions
 export interface SurveyFeedbackForAI {
-  overallSatisfaction?: number; // e.g., from a rating question (q1)
-  facilityCleanliness?: number; // e.g., from q2
-  equipmentSatisfaction?: "sim" | "nao" | string; // e.g., from q3
-  likelyToRecommend?: number; // e.g., from q4
-  comments?: string; // e.g., from an open text question (q5)
+  overallSatisfaction?: number; // from q1_satisfaction (rating)
+  wouldRecommend?: "sim" | "nao" | string; // from q2_recommend (yes-no)
+  comments?: string; // from q3_comments (text)
 }
 
 export interface Student {

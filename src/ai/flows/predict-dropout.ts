@@ -29,9 +29,7 @@ const PredictDropoutInputSchema = z.object({
     .describe('Dados do perfil do usuário incluindo idade, objetivos de fitness e tipo de plano.'),
   surveyFeedback: z.object({
       overallSatisfaction: z.number().optional().describe('Nível de satisfação geral do aluno (1-5).'),
-      facilityCleanliness: z.number().optional().describe('Avaliação da limpeza (1-5).'),
-      equipmentSatisfaction: z.string().optional().describe('Satisfação com os equipamentos (sim/nao).'),
-      likelyToRecommend: z.number().optional().describe('Probabilidade de recomendar a academia (1-5).'),
+      wouldRecommend: z.string().optional().describe('Se o aluno recomendaria a academia (sim/nao).'),
       comments: z.string().optional().describe('Comentários ou sugestões do aluno.'),
     }).optional().describe('Feedback da última pesquisa de satisfação respondida pelo aluno.'),
 });
@@ -80,14 +78,8 @@ const prompt = ai.definePrompt({
   {{#if surveyFeedback.overallSatisfaction}}
   - Satisfação Geral: {{surveyFeedback.overallSatisfaction}}/5
   {{/if}}
-  {{#if surveyFeedback.facilityCleanliness}}
-  - Avaliação da Limpeza: {{surveyFeedback.facilityCleanliness}}/5
-  {{/if}}
-  {{#if surveyFeedback.equipmentSatisfaction}}
-  - Equipamentos Atendem: {{surveyFeedback.equipmentSatisfaction}}
-  {{/if}}
-  {{#if surveyFeedback.likelyToRecommend}}
-  - Recomendaria a Academia: {{surveyFeedback.likelyToRecommend}}/5
+  {{#if surveyFeedback.wouldRecommend}}
+  - Recomendaria a Academia: {{surveyFeedback.wouldRecommend}}
   {{/if}}
   {{#if surveyFeedback.comments}}
   - Comentários Adicionais: "{{surveyFeedback.comments}}"
@@ -96,7 +88,7 @@ const prompt = ai.definePrompt({
 
   Com base nessas informações, determine o dropoutRisk (um valor entre 0 e 1), os motivos (reasons) e as recomendações (recommendations).
   Gere as razões e recomendações em português.
-  Se o feedback da pesquisa for predominantemente negativo, isso deve aumentar o risco de desistência. Se for positivo, pode diminuir ou manter, dependendo dos outros fatores.
+  Se o feedback da pesquisa for predominantemente negativo (baixa satisfação, não recomendaria, comentários negativos), isso deve aumentar significativamente o risco de desistência. Se for positivo, pode diminuir ou manter, dependendo dos outros fatores.
   Considere padrões de frequência (ex: longas ausências, frequência decrescente) como indicadores importantes.
   `,
 });

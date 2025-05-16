@@ -31,7 +31,7 @@ const generateSimulatedData = (question: SurveyQuestion) => {
     const average = sum / SIMULATED_RESPONSES_COUNT;
     return { data, average: average.toFixed(1) };
   } else if (question.type === 'yes-no') {
-    const yesCount = Math.floor(Math.random() * SIMULATED_RESPONSES_COUNT);
+    const yesCount = Math.floor(Math.random() * (SIMULATED_RESPONSES_COUNT / 2)) + Math.floor(SIMULATED_RESPONSES_COUNT / 3) ; // Biased towards 'yes'
     const noCount = SIMULATED_RESPONSES_COUNT - yesCount;
     data.push({ name: 'Sim', value: yesCount });
     data.push({ name: 'Não', value: noCount });

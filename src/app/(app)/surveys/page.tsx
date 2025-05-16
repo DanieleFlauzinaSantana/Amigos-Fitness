@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Edit, Send, BarChart3 } from "lucide-react"; // BarChart3 importado
+import { FileText, Edit, Send, BarChart3 } from "lucide-react";
 import { MOCK_SURVEY } from "@/lib/constants";
 import {
   Tooltip,
@@ -67,9 +67,9 @@ export default function SurveysPage() {
           </CardHeader>
           <CardContent className="flex flex-col md:flex-row gap-6 items-center">
             <div className="flex-1">
-                <h3 className="font-semibold mb-1">Link para Responder:</h3>
+                <h3 className="font-semibold mb-1">Link para Responder (Interno):</h3>
                 <p className="text-sm text-muted-foreground">
-                    Use o link abaixo para que os alunos respondam à pesquisa. Para associar a resposta a um aluno específico (e usar na IA), adicione `?studentId=ID_DO_ALUNO` ao final do link.
+                    Use o link abaixo para que os alunos respondam à pesquisa dentro do sistema. Para associar a resposta a um aluno específico (e usar na IA), adicione `?studentId=ID_DO_ALUNO` ao final do link (isso já é feito automaticamente na página do aluno).
                 </p>
                 <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-1 block">
                     {surveySubmitLink}
@@ -88,7 +88,7 @@ export default function SurveysPage() {
           <CardFooter>
             <Button asChild className="w-full md:w-auto">
               <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer">
-                <Send className="mr-2 h-4 w-4" /> Abrir Formulário da Pesquisa
+                <Send className="mr-2 h-4 w-4" /> Abrir Formulário da Pesquisa (Interno)
               </Link>
             </Button>
           </CardFooter>

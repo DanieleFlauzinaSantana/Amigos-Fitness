@@ -56,22 +56,17 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
       answers: surveyAnswers,
     };
     
-    console.log("Submitting survey:", submissionData);
+    console.log("Submitting survey (internal):", submissionData);
 
-    // Simulação: Se studentId existir, tentar atualizar o MOCK_STUDENTS (isso não persistirá na realidade sem backend)
-    // Em uma aplicação real, aqui você enviaria os dados para um backend.
-    // Por ora, apenas simulamos que a resposta foi associada se studentId for fornecido
+    // Simulação: Se studentId existir, tentar atualizar o MOCK_STUDENTS
+    // Esta é uma simulação e não persiste dados reais.
     if (studentId) {
         const studentIndex = MOCK_STUDENTS.findIndex(s => s.id === studentId);
         if (studentIndex !== -1) {
-            // Para que a IA use esse dado, precisaríamos de uma forma de atualizar o estado global
-            // ou recarregar os dados do aluno. Por enquanto, essa atualização é apenas local no MOCK_STUDENTS
-            // e não persistirá entre navegações sem um backend ou estado global (como Zustand/Redux).
             MOCK_STUDENTS[studentIndex].latestSurveyResponse = submissionData;
             console.log(`Simulação: Resposta da pesquisa associada ao aluno ${MOCK_STUDENTS[studentIndex].name}`);
         }
     }
-
 
     await new Promise(resolve => setTimeout(resolve, 1000)); 
 

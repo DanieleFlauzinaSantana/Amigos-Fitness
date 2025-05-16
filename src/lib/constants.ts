@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, ClipboardCheckIcon, Settings, BarChart3 } from 'lucide-react'; // BarChart3 importado
-import type { Student, Survey, SurveyResponse, SurveyFeedbackForAI } from '@/lib/types';
+import { LayoutDashboard, Users, FileText, ClipboardCheckIcon } from 'lucide-react';
+import type { Student, Survey, SurveyResponse } from '@/lib/types';
 
 interface NavLink {
   href: string;
@@ -16,32 +16,27 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/students', label: 'Alunos', icon: Users },
   { href: '/checkin', label: 'Check-in (Nº Inscrição)', icon: ClipboardCheckIcon },
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
-  // { href: '/settings', label: 'Configurações', icon: Settings }, // Acessível pelo rodapé
 ];
 
 export const MOCK_SURVEY: Survey = {
   id: 'survey1',
-  title: 'Pesquisa de Satisfação da Amigos Fitness',
-  description: 'Seu feedback é muito importante para nós! Responda às perguntas abaixo.',
+  title: 'Pesquisa de Satisfação Amigos Fitness',
+  description: 'Seu feedback é muito importante para nós! Por favor, responda às perguntas abaixo.',
   questions: [
-    { id: 'q1', text: 'Qual seu nível de satisfação geral com a academia (1 a 5 estrelas)?', type: 'rating' },
-    { id: 'q2', text: 'Como você avalia a limpeza das instalações (1 a 5 estrelas)?', type: 'rating' },
-    { id: 'q3', text: 'Os equipamentos disponíveis atendem às suas necessidades?', type: 'yes-no' },
-    { id: 'q4', text: 'Em uma escala de 1 a 5, o quão provável você recomendaria a Amigos Fitness a um amigo ou colega?', type: 'rating' },
-    { id: 'q5', text: 'Deixe um comentário, sugestão ou crítica construtiva (opcional):', type: 'text' },
+    { id: 'q1_satisfaction', text: 'Qual seu nível de satisfação geral com a academia (1 a 5 estrelas)?', type: 'rating' },
+    { id: 'q2_recommend', text: 'Você recomendaria a Amigos Fitness a um amigo ou colega?', type: 'yes-no' },
+    { id: 'q3_comments', text: 'Deixe um comentário ou sugestão (opcional):', type: 'text' },
   ],
 };
 
 export const anaSilvaSurveyResponse: SurveyResponse = {
   surveyId: 'survey1',
   studentId: '1',
-  submittedAt: '2024-07-10T10:00:00Z',
+  submittedAt: '2024-07-20T10:00:00Z',
   answers: [
-    { questionId: 'q1', value: 4 }, // Satisfação Geral
-    { questionId: 'q2', value: 5 }, // Limpeza
-    { questionId: 'q3', value: 'sim' }, // Equipamentos
-    { questionId: 'q4', value: 5 }, // Recomendaria
-    { questionId: 'q5', value: 'Gostaria de mais aulas de Zumba às sextas-feiras!' }, // Comentário
+    { questionId: 'q1_satisfaction', value: 4 }, // Satisfação Geral
+    { questionId: 'q2_recommend', value: 'sim' }, // Recomendaria
+    { questionId: 'q3_comments', value: 'Gostaria de mais aulas de dança!' }, // Comentário
   ],
 };
 
@@ -114,7 +109,7 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-11', attended: true },
     ],
     missedClassesCount: 0,
-    latestSurveyResponse: undefined, // Bruno ainda não respondeu
+    latestSurveyResponse: undefined, 
 
     genderIdentity: "masculino",
     maritalStatus: "casado_uniao",
@@ -160,7 +155,7 @@ export const MOCK_STUDENTS: Student[] = [
        { date: '2024-07-10', attended: false },
     ],
     missedClassesCount: 4,
-    latestSurveyResponse: undefined, // Carla ainda não respondeu
+    latestSurveyResponse: undefined, 
 
     genderIdentity: "outro_nao_informar",
     maritalStatus: "divorciado",
