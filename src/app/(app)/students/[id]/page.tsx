@@ -7,6 +7,7 @@ import { ProfileDetailsSection } from './components/ProfileDetailsSection';
 import { AttendanceSection } from './components/AttendanceSection';
 import { DropoutPredictionSection } from './components/DropoutPredictionSection';
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
+import { QRCodeSection } from './components/QRCodeSection'; // Importado
 import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -67,6 +68,7 @@ export default function StudentDetailPage() {
           <Skeleton className="h-64 w-full" />
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-32 w-full" />
         </div>
       </div>
     );
@@ -92,10 +94,17 @@ export default function StudentDetailPage() {
         </Button>
       </PageHeader>
 
-      <ProfileDetailsSection student={student} onUpdateStudent={handleUpdateStudent} />
-      <AttendanceSection studentId={student.id} initialAttendance={student.attendance} onAttendanceUpdate={handleAttendanceUpdate}/>
-      <DropoutPredictionSection student={student} />
-      <AbsenceNotificationSection student={student} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <ProfileDetailsSection student={student} onUpdateStudent={handleUpdateStudent} />
+          <AttendanceSection studentId={student.id} initialAttendance={student.attendance} onAttendanceUpdate={handleAttendanceUpdate}/>
+        </div>
+        <div className="lg:col-span-1 space-y-8">
+          <QRCodeSection student={student} />
+          <DropoutPredictionSection student={student} />
+          <AbsenceNotificationSection student={student} />
+        </div>
+      </div>
     </div>
   );
 }
