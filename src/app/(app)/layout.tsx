@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -55,8 +56,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
            <div className="flex items-center gap-3 mb-4">
             <Image src="https://placehold.co/40x40.png" alt="Avatar do Usuário" data-ai-hint="user avatar" width={40} height={40} className="rounded-full" />
             <div>
-              <p className="text-sm font-medium text-sidebar-foreground">Usuário Admin</p>
-              <p className="text-xs text-sidebar-foreground/70">admin@example.com</p>
+              <p className="text-sm font-medium text-sidebar-foreground">Proprietário</p>
+              <p className="text-xs text-sidebar-foreground/70">danielesoudapaz@hotmail.com</p>
             </div>
           </div>
           <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
