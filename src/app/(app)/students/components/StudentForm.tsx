@@ -31,12 +31,21 @@ const studentFormSchema = z.object({
   email: z.string().email({ message: "Email inválido." }),
   phone: z.string().optional(),
   dateOfBirth: z.string().optional(),
+  joinDate: z.string().min(1, {message: "Data de início é obrigatória"}),
+  membershipType: z.enum(["Basico", "Premium", "Experimental"]),
   emergencyContactName: z.string().optional(),
   emergencyContactPhone: z.string().optional(),
-  membershipType: z.enum(["Basico", "Premium", "Experimental"]),
-  joinDate: z.string().min(1, {message: "Data de início é obrigatória"}),
+  
+  // Novas informações pessoais
+  genderIdentity: z.enum(["feminino", "masculino", "outro_nao_informar", "nao_informado"]).optional(),
+  maritalStatus: z.enum(["solteiro", "casado_uniao", "divorciado", "viuvo", "nao_informado"]).optional(),
+  hasChildren: z.enum(["sim", "nao", "nao_informado"]).optional(), // Já existente
+  occupation: z.string().optional(),
+  monthlyIncome: z.enum(["menos_1000", "1000_2500", "2500_5000", "5000_10000", "acima_10000", "prefiro_nao_informar", "nao_informado"]).optional(),
+  educationLevel: z.enum(["fundamental_incompleto", "fundamental_completo", "medio_incompleto", "medio_completo", "superior_incompleto", "superior_completo", "pos_graduacao", "nao_informado"]).optional(),
+
+  // Preferências (mantido)
   likesWinter: z.enum(["sim", "nao", "nao_informado"]).optional(),
-  hasChildren: z.enum(["sim", "nao", "nao_informado"]).optional(),
 
   // ROTINA E DISPONIBILIDADE
   bestTrainingTime: z.enum(["manha", "tarde", "noite", "nao_informado"]).optional(),
@@ -90,8 +99,13 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       phone: student.phone || '',
       emergencyContactName: student.emergencyContactName || '',
       emergencyContactPhone: student.emergencyContactPhone || '',
-      likesWinter: student.likesWinter || "nao_informado",
+      genderIdentity: student.genderIdentity || "nao_informado",
+      maritalStatus: student.maritalStatus || "nao_informado",
       hasChildren: student.hasChildren || "nao_informado",
+      occupation: student.occupation || "",
+      monthlyIncome: student.monthlyIncome || "nao_informado",
+      educationLevel: student.educationLevel || "nao_informado",
+      likesWinter: student.likesWinter || "nao_informado",
       bestTrainingTime: student.bestTrainingTime || "nao_informado",
       daysPerWeek: student.daysPerWeek || "",
       workSchedule: student.workSchedule || "nao_informado",
@@ -116,12 +130,17 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       email: "",
       phone: "",
       dateOfBirth: "",
+      joinDate: new Date().toISOString().split('T')[0], // Default to today
+      membershipType: "Basico",
       emergencyContactName: "",
       emergencyContactPhone: "",
-      membershipType: "Basico",
-      joinDate: new Date().toISOString().split('T')[0], // Default to today
-      likesWinter: "nao_informado",
+      genderIdentity: "nao_informado",
+      maritalStatus: "nao_informado",
       hasChildren: "nao_informado",
+      occupation: "",
+      monthlyIncome: "nao_informado",
+      educationLevel: "nao_informado",
+      likesWinter: "nao_informado",
       bestTrainingTime: "nao_informado",
       daysPerWeek: "",
       workSchedule: "nao_informado",
@@ -152,7 +171,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SectionTitle>Informações Pessoais</SectionTitle>
+          <SectionTitle>Informações Pessoais Básicas</SectionTitle>
           <FormField
             control={form.control}
             name="name"
@@ -210,7 +229,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
             name="joinDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de Início</FormLabel>
+                <FormLabel>Data de Início na Academia</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -266,6 +285,128 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
               </FormItem>
             )}
           />
+
+          <Separator className="md:col-span-2 my-4" />
+          <SectionTitle>Informações Pessoais Detalhadas</SectionTitle>
+          
+          <FormField
+            control={form.control}
+            name="genderIdentity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Identidade de Gênero</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="feminino">Feminino</SelectItem>
+                    <SelectItem value="masculino">Masculino</SelectItem>
+                    <SelectItem value="outro_nao_informar">Outro / Prefere não informar</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="maritalStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado Civil</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                    <SelectItem value="casado_uniao">Casado(a) / União estável</SelectItem>
+                    <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                    <SelectItem value="viuvo">Viúvo(a)</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="hasChildren" // Já existente, só ajustando o label e posição
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Possui filhos ou dependentes?</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma opção" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="occupation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ocupação Atual</FormLabel>
+                <FormControl><Input placeholder="Ex: Estudante, Professor" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="monthlyIncome"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Renda Mensal Aproximada</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="menos_1000">Menos de R$ 1.000</SelectItem>
+                    <SelectItem value="1000_2500">De R$ 1.000 a R$ 2.500</SelectItem>
+                    <SelectItem value="2500_5000">De R$ 2.500 a R$ 5.000</SelectItem>
+                    <SelectItem value="5000_10000">De R$ 5.000 a R$ 10.000</SelectItem>
+                    <SelectItem value="acima_10000">Acima de R$ 10.000</SelectItem>
+                    <SelectItem value="prefiro_nao_informar">Prefiro não informar</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="educationLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nível de Escolaridade</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="fundamental_incompleto">Ensino fundamental incompleto</SelectItem>
+                    <SelectItem value="fundamental_completo">Ensino fundamental completo</SelectItem>
+                    <SelectItem value="medio_incompleto">Ensino médio incompleto</SelectItem>
+                    <SelectItem value="medio_completo">Ensino médio completo</SelectItem>
+                    <SelectItem value="superior_incompleto">Ensino superior incompleto</SelectItem>
+                    <SelectItem value="superior_completo">Ensino superior completo</SelectItem>
+                    <SelectItem value="pos_graduacao">Pós-graduação ou mais</SelectItem>
+                    <SelectItem value="nao_informado">Não Informado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="likesWinter"
@@ -288,28 +429,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="hasChildren"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tem Filhos?</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value || "nao_informado"}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma opção" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim</SelectItem>
-                    <SelectItem value="nao">Não</SelectItem>
-                    <SelectItem value="nao_informado">Não Informado</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          
 
           <Separator className="md:col-span-2 my-4" />
           <SectionTitle>🕒 Rotina e Disponibilidade</SectionTitle>
@@ -643,3 +763,4 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
     </Form>
   );
 }
+

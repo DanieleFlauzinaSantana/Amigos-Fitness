@@ -1,5 +1,6 @@
+
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, ClipboardCheckIcon as ClipboardCheck } from 'lucide-react'; // Renomeado para evitar conflito
+import { LayoutDashboard, Users, FileText, ClipboardCheck } from 'lucide-react'; 
 import type { Student, Survey, SurveyQuestion } from '@/lib/types';
 
 interface NavLink {
@@ -39,8 +40,16 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-15', attended: true },
     ],
     missedClassesCount: 3,
-    likesWinter: "sim",
+    
+    // Informações Pessoais Detalhadas
+    genderIdentity: "feminino",
+    maritalStatus: "solteiro",
     hasChildren: "nao",
+    occupation: "Designer Gráfica",
+    monthlyIncome: "2500_5000",
+    educationLevel: "superior_completo",
+    
+    likesWinter: "sim",
     
     bestTrainingTime: "manha",
     daysPerWeek: "3-4",
@@ -78,8 +87,15 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-11', attended: true },
     ],
     missedClassesCount: 0,
-    likesWinter: "nao",
+
+    genderIdentity: "masculino",
+    maritalStatus: "casado_uniao",
     hasChildren: "sim",
+    occupation: "Engenheiro de Software",
+    monthlyIncome: "acima_10000",
+    educationLevel: "pos_graduacao",
+    
+    likesWinter: "nao",
 
     bestTrainingTime: "noite",
     daysPerWeek: "5",
@@ -116,8 +132,15 @@ export const MOCK_STUDENTS: Student[] = [
        { date: '2024-07-10', attended: false },
     ],
     missedClassesCount: 4,
-    likesWinter: "nao_informado",
+
+    genderIdentity: "outro_nao_informar",
+    maritalStatus: "divorciado",
     hasChildren: "nao_informado",
+    occupation: "Autônoma",
+    monthlyIncome: "1000_2500",
+    educationLevel: "medio_completo",
+
+    likesWinter: "nao_informado",
 
     bestTrainingTime: "tarde",
     daysPerWeek: "2-3",
@@ -155,3 +178,4 @@ export const MOCK_SURVEY: Survey = {
   description: 'Sua opinião é muito importante para nós! Por favor, dedique alguns minutos para responder a esta pesquisa e nos ajudar a melhorar nossos serviços.',
   questions: MOCK_SURVEY_QUESTIONS,
 };
+

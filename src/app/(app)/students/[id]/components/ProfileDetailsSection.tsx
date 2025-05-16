@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { StudentForm } from '../../components/StudentForm';
 import type { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard } from 'lucide-react'; 
+import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard, Binary, HeartHandshake, DollarSign, GraduationCap, Contact } from 'lucide-react'; 
 import { Separator } from '@/components/ui/separator';
 
 
@@ -31,7 +31,7 @@ const SectionTitleDisplay: React.FC<{ children: React.ReactNode, icon?: React.El
 );
 
 
-export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetailsSectionProps) {
+export function ProfileDetailsSection({ student, onUpdateStudent }: { student: Student, onUpdateStudent: (updatedStudent: Student) => void;}) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -60,6 +60,43 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
   const formatDisplayValue = (value: string | undefined, mapping: Record<string, string>, defaultValue = "Não informado") => {
     return value ? mapping[value] || value : defaultValue;
   }
+  
+  const genderIdentityMap = {
+    feminino: "Feminino",
+    masculino: "Masculino",
+    outro_nao_informar: "Outro / Prefere não informar",
+    nao_informado: "Não informado"
+  };
+
+  const maritalStatusMap = {
+    solteiro: "Solteiro(a)",
+    casado_uniao: "Casado(a) / União estável",
+    divorciado: "Divorciado(a)",
+    viuvo: "Viúvo(a)",
+    nao_informado: "Não informado"
+  };
+
+  const monthlyIncomeMap = {
+    menos_1000: "Menos de R$ 1.000",
+    "1000_2500": "De R$ 1.000 a R$ 2.500",
+    "2500_5000": "De R$ 2.500 a R$ 5.000",
+    "5000_10000": "De R$ 5.000 a R$ 10.000",
+    acima_10000: "Acima de R$ 10.000",
+    prefiro_nao_informar: "Prefere não informar",
+    nao_informado: "Não informado"
+  };
+
+  const educationLevelMap = {
+    fundamental_incompleto: "Ensino fundamental incompleto",
+    fundamental_completo: "Ensino fundamental completo",
+    medio_incompleto: "Ensino médio incompleto",
+    medio_completo: "Ensino médio completo",
+    superior_incompleto: "Ensino superior incompleto",
+    superior_completo: "Ensino superior completo",
+    pos_graduacao: "Pós-graduação ou mais",
+    nao_informado: "Não informado"
+  };
+
 
   return (
     <Card>
@@ -108,13 +145,21 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetai
         <Separator className="my-6" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-          <SectionTitleDisplay icon={User}>Informações Pessoais</SectionTitleDisplay>
+          <SectionTitleDisplay icon={User}>Informações Pessoais Básicas</SectionTitleDisplay>
           <DetailItem icon={Cake} label="Data de Nascimento" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('pt-BR') : undefined} />
           <DetailItem icon={CalendarDays} label="Data de Início na Academia" value={new Date(student.joinDate).toLocaleDateString('pt-BR')} />
           <DetailItem icon={Tag} label="Tipo de Plano (Academia)" value={student.membershipType} />
           <DetailItem icon={Shield} label="Contato de Emergência" value={`${student.emergencyContactName || ''} ${student.emergencyContactPhone || ''}`.trim() || undefined} />
+
+          <SectionTitleDisplay icon={Contact}>Informações Pessoais Detalhadas</SectionTitleDisplay>
+          <DetailItem icon={Binary} label="Identidade de Gênero" value={formatDisplayValue(student.genderIdentity, genderIdentityMap)} />
+          <DetailItem icon={HeartHandshake} label="Estado Civil" value={formatDisplayValue(student.maritalStatus, maritalStatusMap)} />
+          <DetailItem icon={Users2} label="Possui filhos ou dependentes?" value={formatYesNoNotInformated(student.hasChildren)} />
+          <DetailItem icon={Briefcase} label="Ocupação Atual" value={student.occupation} />
+          <DetailItem icon={DollarSign} label="Renda Mensal Aproximada" value={formatDisplayValue(student.monthlyIncome, monthlyIncomeMap)} />
+          <DetailItem icon={GraduationCap} label="Nível de Escolaridade" value={formatDisplayValue(student.educationLevel, educationLevelMap)} />
           <DetailItem icon={Snowflake} label="Gosta de Inverno?" value={formatYesNoNotInformated(student.likesWinter)} />
-          <DetailItem icon={Users2} label="Tem Filhos?" value={formatYesNoNotInformated(student.hasChildren)} />
+          
 
           <SectionTitleDisplay icon={Clock}>🕒 Rotina e Disponibilidade</SectionTitleDisplay>
           <DetailItem icon={Hourglass} label="Melhor horário para treinar" value={formatDisplayValue(student.bestTrainingTime, {manha: "Manhã", tarde: "Tarde", noite: "Noite"})} />

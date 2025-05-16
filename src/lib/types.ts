@@ -1,3 +1,4 @@
+
 export interface Student {
   id: string;
   name: string;
@@ -12,12 +13,17 @@ export interface Student {
   attendance: AttendanceRecord[];
   missedClassesCount: number;
 
-  // Perguntas antigas que foram adaptadas ou mantidas
-  likesWinter?: "sim" | "nao" | "nao_informado";
-  hasChildren?: "sim" | "nao" | "nao_informado";
+  // Perguntas Pessoais (expansão)
+  genderIdentity?: "feminino" | "masculino" | "outro_nao_informar" | "nao_informado";
+  maritalStatus?: "solteiro" | "casado_uniao" | "divorciado" | "viuvo" | "nao_informado";
+  hasChildren?: "sim" | "nao" | "nao_informado"; // Já existente, mas agora agrupado aqui
+  occupation?: string;
+  monthlyIncome?: "menos_1000" | "1000_2500" | "2500_5000" | "5000_10000" | "acima_10000" | "prefiro_nao_informar" | "nao_informado";
+  educationLevel?: "fundamental_incompleto" | "fundamental_completo" | "medio_incompleto" | "medio_completo" | "superior_incompleto" | "superior_completo" | "pos_graduacao" | "nao_informado";
   
-  // Novas Perguntas
-
+  // Perguntas de Preferência (mantidas)
+  likesWinter?: "sim" | "nao" | "nao_informado";
+  
   // ROTINA E DISPONIBILIDADE
   bestTrainingTime?: "manha" | "tarde" | "noite" | "nao_informado";
   daysPerWeek?: string; // e.g., "3", "5", "todos_os_dias"
@@ -46,9 +52,6 @@ export interface Student {
   // DADOS DE CONTRATO (opcional)
   contractPlan?: "mensal" | "trimestral" | "semestral" | "anual" | "nao_informado";
   paymentMethod?: "cartao_credito" | "cartao_debito" | "pix" | "boleto" | "dinheiro" | "nao_informado";
-
-  // Campo fitnessGoals original foi substituído por mainGoal e otherGoalDetail
-  // Campo previousGyms original foi substituído por attendedGymBefore, previousGymDuration, reasonForLeavingPreviousGym
 }
 
 export interface AttendanceRecord {
@@ -89,3 +92,4 @@ export interface DropoutPredictionResult {
   reasons: string[];
   recommendations: string[];
 }
+
