@@ -12,7 +12,7 @@ export interface Student {
   profilePictureUrl?: string;
   attendance: AttendanceRecord[];
   missedClassesCount: number;
-  latestSurveyResponse?: SurveyResponse; // Novo campo
+  // latestSurveyResponse?: SurveyResponse; // Removido pois as respostas estarão no Google Forms
 
   // Informações Pessoais Detalhadas
   genderIdentity?: "feminino" | "masculino" | "outro_nao_informar" | "nao_informado";
@@ -60,31 +60,8 @@ export interface AttendanceRecord {
   attended: boolean;
 }
 
-export interface Survey {
-  id: string;
-  title: string;
-  description: string;
-  questions: SurveyQuestion[];
-}
-
-export interface SurveyQuestion {
-  id: string;
-  text: string;
-  type: 'rating' | 'text' | 'multiple-choice';
-  options?: string[];
-}
-
-export interface SurveyResponse {
-  surveyId: string;
-  studentId?: string; // Optional for anonymous surveys
-  answers: SurveyAnswer[];
-  submittedAt: string; // ISO Date string
-}
-
-export interface SurveyAnswer {
-  questionId: string;
-  value: string | number;
-}
+// Removidos Survey, SurveyQuestion, SurveyResponse, SurveyAnswer, SurveyFeedbackForAI
+// pois a pesquisa será gerenciada pelo Google Forms.
 
 // For AI flow inputs/outputs if needed beyond direct flow types
 // Example: Dropout prediction display data
@@ -92,12 +69,4 @@ export interface DropoutPredictionResult {
   dropoutRisk: number;
   reasons: string[];
   recommendations: string[];
-}
-
-// Para o fluxo de IA de previsão de desistência, para incluir feedback da pesquisa
-export interface SurveyFeedbackForAI {
-  overallSatisfaction?: number; // e.g., from a rating question (1-5)
-  likelihoodToRecommend?: string; // e.g., Sim, Não, Talvez
-  positiveComments?: string;
-  negativeComments?: string;
 }

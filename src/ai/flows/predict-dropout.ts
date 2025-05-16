@@ -2,8 +2,8 @@
 // src/ai/flows/predict-dropout.ts
 'use server';
 /**
- * @fileOverview Predicts potential early dropouts based on attendance and profile data,
- * and optionally, feedback from their latest satisfaction survey.
+ * @fileOverview Predicts potential early dropouts based on attendance and profile data.
+ * Responde em português.
  *
  * - predictDropout - Function to predict dropout risk.
  * - PredictDropoutInput - Input type for predictDropout function.
@@ -12,7 +12,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { SurveyFeedbackForAI } from '@/lib/types'; // Importando o tipo
 
 const PredictDropoutInputSchema = z.object({
   attendanceRecords: z
@@ -26,11 +25,7 @@ const PredictDropoutInputSchema = z.object({
       engagementLevel: z.string().optional(),
     })
     .describe('Dados do perfil do usuário incluindo idade, objetivos de fitness e tipo de plano.'),
-  surveyFeedback: z.object({
-      overallSatisfaction: z.number().min(1).max(5).optional().describe('Pontuação de satisfação geral de 1 (muito insatisfeito) a 5 (muito satisfeito).'),
-      likelihoodToRecommend: z.string().optional().describe('Probabilidade de recomendar a academia (ex: Sim, Não, Talvez).'),
-      comments: z.string().optional().describe('Comentários abertos da pesquisa.'),
-    }).optional().describe('Feedback da última pesquisa de satisfação do aluno, se disponível.')
+  // surveyFeedback foi removido pois as respostas agora estão no Google Forms.
 });
 export type PredictDropoutInput = z.infer<typeof PredictDropoutInputSchema>;
 
@@ -40,10 +35,10 @@ const PredictDropoutOutputSchema = z.object({
     .describe(
       'Um valor entre 0 e 1 indicando o risco de desistência, sendo 1 o maior risco.'
     ),
-  reasons: z.array(z.string()).describe('Motivos para o risco de desistência previsto.'),
+  reasons: z.array(z.string()).describe('Motivos para o risco de desistência previsto, em português.'),
   recommendations: z
     .array(z.string())
-    .describe('Recomendações para mitigar o risco de desistência.'),
+    .describe('Recomendações para mitigar o risco de desistência, em português.'),
 });
 export type PredictDropoutOutput = z.infer<typeof PredictDropoutOutputSchema>;
 
@@ -57,7 +52,7 @@ const prompt = ai.definePrompt({
   output: {schema: PredictDropoutOutputSchema},
   prompt: `Você é um assistente de IA que ajuda gerentes de academia a prever se um aluno irá desistir e fornece recomendações para evitar isso. Responda em português.
 
-  Analise os seguintes registros de frequência, dados do perfil e feedback da pesquisa (se disponível) para prever o risco de desistência. Forneça motivos para sua previsão e recomendações para mitigar o risco.
+  Analise os seguintes registros de frequência e dados do perfil para prever o risco de desistência. Forneça motivos para sua previsão e recomendações para mitigar o risco.
 
   Registros de Frequência:
   {{#each attendanceRecords}}
@@ -72,21 +67,7 @@ const prompt = ai.definePrompt({
   - Nível de Engajamento: {{profileData.engagementLevel}}
   {{/if}}
 
-  {{#if surveyFeedback}}
-  Feedback da Última Pesquisa:
-  {{#if surveyFeedback.overallSatisfaction}}
-  - Satisfação Geral (1-5): {{surveyFeedback.overallSatisfaction}}
-  {{/if}}
-  {{#if surveyFeedback.likelihoodToRecommend}}
-  - Probabilidade de Recomendar: {{surveyFeedback.likelihoodToRecommend}}
-  {{/if}}
-  {{#if surveyFeedback.comments}}
-  - Comentários: "{{surveyFeedback.comments}}"
-  {{/if}}
-  {{/if}}
-
   Com base nessas informações, determine o dropoutRisk (um valor entre 0 e 1), os motivos (reasons) e as recomendações (recommendations).
-  Considere baixa satisfação ou comentários negativos na pesquisa como indicadores potenciais de aumento do risco de desistência.
   Gere as razões e recomendações em português.
   `,
 });
@@ -98,4 +79,3 @@ const predictDropoutFlow = ai.defineFlow(
     return output!;
   }
 );
-

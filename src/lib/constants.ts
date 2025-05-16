@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, FileText, ClipboardCheckIcon } from 'lucide-react'; 
-import type { Student, Survey, SurveyQuestion, SurveyResponse } from '@/lib/types';
+import type { Student } from '@/lib/types';
 
 interface NavLink {
   href: string;
@@ -18,34 +18,8 @@ export const NAV_LINKS: NavLink[] = [
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
 ];
 
-const MOCK_SURVEY_QUESTIONS: SurveyQuestion[] = [
-  { id: 'q1', text: 'Qual o seu nível de satisfação com a limpeza das instalações?', type: 'rating' }, // overallSatisfaction
-  { id: 'q2', text: 'Como você avalia a qualidade dos equipamentos?', type: 'rating' },
-  { id: 'q3', text: 'Os horários das aulas atendem às suas necessidades?', type: 'multiple-choice', options: ['Sim', 'Não', 'Em parte'] },
-  { id: 'q4', text: 'Você indicaria a Amigos Fitness para um amigo?', type: 'multiple-choice', options: ['Sim, com certeza', 'Talvez', 'Não'] }, // likelihoodToRecommend
-  { id: 'q5', text: 'Deixe seus comentários ou sugestões:', type: 'text' }, // comments
-];
-
-export const MOCK_SURVEY: Survey = {
-  id: 'survey1',
-  title: 'Pesquisa de Satisfação - Amigos Fitness',
-  description: 'Sua opinião é muito importante para nós! Por favor, dedique alguns minutos para responder a esta pesquisa e nos ajudar a melhorar nossos serviços.',
-  questions: MOCK_SURVEY_QUESTIONS,
-};
-
-// Exemplo de resposta à pesquisa para Ana Silva
-const anaSilvaSurveyResponse: SurveyResponse = {
-  surveyId: MOCK_SURVEY.id,
-  studentId: '1',
-  submittedAt: '2024-07-18T10:00:00Z',
-  answers: [
-    { questionId: 'q1', value: 4 }, // Satisfação com limpeza
-    { questionId: 'q2', value: 5 }, // Qualidade dos equipamentos
-    { questionId: 'q3', value: 'Sim' }, // Horários atendem
-    { questionId: 'q4', value: 'Sim, com certeza' }, // Indicaria
-    { questionId: 'q5', value: 'Adoro as aulas de Zumba, mas gostaria de mais opções de esteiras nos horários de pico.' }, // Comentários
-  ],
-};
+// MOCK_SURVEY, MOCK_SURVEY_QUESTIONS, anaSilvaSurveyResponse removidos
+// A pesquisa agora será um link para o Google Forms.
 
 export const MOCK_STUDENTS: Student[] = [
   {
@@ -69,7 +43,7 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-15', attended: true },
     ],
     missedClassesCount: 3,
-    latestSurveyResponse: anaSilvaSurveyResponse, // Resposta da Ana
+    // latestSurveyResponse removido
     
     // Informações Pessoais Detalhadas
     genderIdentity: "feminino",
@@ -117,7 +91,6 @@ export const MOCK_STUDENTS: Student[] = [
       { date: '2024-07-11', attended: true },
     ],
     missedClassesCount: 0,
-    // latestSurveyResponse: undefined, // Bruno ainda não respondeu
 
     genderIdentity: "masculino",
     maritalStatus: "casado_uniao",
@@ -163,7 +136,6 @@ export const MOCK_STUDENTS: Student[] = [
        { date: '2024-07-10', attended: false },
     ],
     missedClassesCount: 4,
-    // latestSurveyResponse: undefined, // Carla ainda não respondeu
 
     genderIdentity: "outro_nao_informar",
     maritalStatus: "divorciado",
