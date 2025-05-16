@@ -21,7 +21,11 @@ export default function StudentsPage() {
   }, []);
 
   const handleStudentAdded = (newStudent: Student) => {
+    // Update the local state for immediate UI refresh
     setStudents(prevStudents => [newStudent, ...prevStudents]);
+    // Also update the MOCK_STUDENTS array so the change persists
+    // across navigations (for this frontend-only mock data setup)
+    MOCK_STUDENTS.unshift(newStudent); 
   };
 
   return (
