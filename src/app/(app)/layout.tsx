@@ -28,7 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarHeader className="p-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <Dumbbell className="h-8 w-8 text-sidebar-foreground" />
-            <h1 className="text-xl font-semibold text-sidebar-foreground">Academia Inteligente</h1>
+            <h1 className="text-xl font-semibold text-sidebar-foreground">Amigos Fitness</h1>
           </Link>
         </SidebarHeader>
         <SidebarContent>

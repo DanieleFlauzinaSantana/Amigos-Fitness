@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function DashboardPage() {
   return (
     <div>
-      <PageHeader title="Painel" description="Bem-vindo à Academia Inteligente!" />
+      <PageHeader title="Painel" description="Bem-vindo à Amigos Fitness!" />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -47,7 +47,7 @@ export default function DashboardPage() {
         
         <Card className="md:col-span-2 lg:col-span-3 hover:shadow-lg transition-shadow">
           <CardHeader>
-            <CardTitle>Visão Geral da Academia</CardTitle>
+            <CardTitle>Visão Geral da Amigos Fitness</CardTitle>
             <CardDescription>Acompanhe o progresso e engajamento dos seus alunos.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col md:flex-row gap-4 items-center">

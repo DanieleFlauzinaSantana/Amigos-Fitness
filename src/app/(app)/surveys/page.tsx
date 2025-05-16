@@ -30,7 +30,7 @@ export default function SurveysPage() {
               <h3 className="font-semibold mb-1">Detalhes da Pesquisa:</h3>
               <p className="text-sm text-muted-foreground">ID: {MOCK_SURVEY.id}</p>
               <p className="text-sm text-muted-foreground">Número de Questões: {MOCK_SURVEY.questions.length}</p>
-              <p className="text-sm text-muted-foreground mt-2">Esta pesquisa ajuda a entender a satisfação geral dos alunos com os serviços e instalações da academia.</p>
+              <p className="text-sm text-muted-foreground mt-2">Esta pesquisa ajuda a entender a satisfação geral dos alunos com os serviços e instalações da Amigos Fitness.</p> {/* Atualizado aqui */}
             </div>
             <Image 
               src="https://placehold.co/200x150.png" 

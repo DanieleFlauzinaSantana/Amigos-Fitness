@@ -13,7 +13,7 @@ interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { href: '/dashboard', label: 'Painel', icon: LayoutDashboard, exact: true },
   { href: '/students', label: 'Alunos', icon: Users },
-  { href: '/checkin', label: 'Check-in por QR Code', icon: ScanLine }, // Novo link
+  { href: '/checkin', label: 'Check-in por QR Code', icon: ScanLine }, 
   { href: '/surveys', label: 'Pesquisas', icon: FileText },
 ];
 
@@ -81,13 +81,13 @@ const MOCK_SURVEY_QUESTIONS: SurveyQuestion[] = [
   { id: 'q1', text: 'Qual o seu nível de satisfação com a limpeza das instalações?', type: 'rating' },
   { id: 'q2', text: 'Como você avalia a qualidade dos equipamentos?', type: 'rating' },
   { id: 'q3', text: 'Os horários das aulas atendem às suas necessidades?', type: 'multiple-choice', options: ['Sim', 'Não', 'Em parte'] },
-  { id: 'q4', text: 'Você indicaria a academia para um amigo?', type: 'multiple-choice', options: ['Sim, com certeza', 'Talvez', 'Não'] },
+  { id: 'q4', text: 'Você indicaria a Amigos Fitness para um amigo?', type: 'multiple-choice', options: ['Sim, com certeza', 'Talvez', 'Não'] }, // Atualizado aqui
   { id: 'q5', text: 'Deixe seus comentários ou sugestões:', type: 'text' },
 ];
 
 export const MOCK_SURVEY: Survey = {
   id: 'survey1',
-  title: 'Pesquisa de Satisfação - Academia Inteligente',
+  title: 'Pesquisa de Satisfação - Amigos Fitness', // Atualizado aqui
   description: 'Sua opinião é muito importante para nós! Por favor, dedique alguns minutos para responder a esta pesquisa e nos ajudar a melhorar nossos serviços.',
   questions: MOCK_SURVEY_QUESTIONS,
 };

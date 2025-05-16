@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Academia Inteligente',
-  description: 'Gerenciamento Inteligente para sua Academia',
+  title: 'Amigos Fitness',
+  description: 'Gerenciamento Inteligente para sua Comunidade Fitness',
 };
 
 export default function RootLayout({
