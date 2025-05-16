@@ -17,7 +17,7 @@ import type { SurveyFeedbackForAI } from '@/lib/types'; // Importando o tipo
 const PredictDropoutInputSchema = z.object({
   attendanceRecords: z
     .array(z.object({date: z.string(), attended: z.boolean()}))
-    .describe('Array of attendance records with date and attendance status.'),
+    .describe('Array de registros de frequência com data e status de presença.'),
   profileData: z
     .object({
       age: z.number(),
@@ -25,12 +25,12 @@ const PredictDropoutInputSchema = z.object({
       membershipType: z.string(),
       engagementLevel: z.string().optional(),
     })
-    .describe('User profile data including age, fitness goals, and membership type.'),
+    .describe('Dados do perfil do usuário incluindo idade, objetivos de fitness e tipo de plano.'),
   surveyFeedback: z.object({
-      overallSatisfaction: z.number().min(1).max(5).optional().describe('Overall satisfaction score from 1 (very dissatisfied) to 5 (very satisfied).'),
-      likelihoodToRecommend: z.string().optional().describe('Likelihood to recommend the gym (e.g., Sim, Não, Talvez).'),
-      comments: z.string().optional().describe('Open-ended comments from the survey.'),
-    }).optional().describe('Feedback from the latest student satisfaction survey, if available.')
+      overallSatisfaction: z.number().min(1).max(5).optional().describe('Pontuação de satisfação geral de 1 (muito insatisfeito) a 5 (muito satisfeito).'),
+      likelihoodToRecommend: z.string().optional().describe('Probabilidade de recomendar a academia (ex: Sim, Não, Talvez).'),
+      comments: z.string().optional().describe('Comentários abertos da pesquisa.'),
+    }).optional().describe('Feedback da última pesquisa de satisfação do aluno, se disponível.')
 });
 export type PredictDropoutInput = z.infer<typeof PredictDropoutInputSchema>;
 
@@ -38,12 +38,12 @@ const PredictDropoutOutputSchema = z.object({
   dropoutRisk: z
     .number()
     .describe(
-      'A value between 0 and 1 indicating the risk of dropout, with 1 being the highest risk.'
+      'Um valor entre 0 e 1 indicando o risco de desistência, sendo 1 o maior risco.'
     ),
-  reasons: z.array(z.string()).describe('Reasons for the predicted dropout risk.'),
+  reasons: z.array(z.string()).describe('Motivos para o risco de desistência previsto.'),
   recommendations: z
     .array(z.string())
-    .describe('Recommendations to mitigate the dropout risk.'),
+    .describe('Recomendações para mitigar o risco de desistência.'),
 });
 export type PredictDropoutOutput = z.infer<typeof PredictDropoutOutputSchema>;
 
@@ -55,38 +55,39 @@ const prompt = ai.definePrompt({
   name: 'predictDropoutPrompt',
   input: {schema: PredictDropoutInputSchema},
   output: {schema: PredictDropoutOutputSchema},
-  prompt: `You are an AI assistant that helps gym managers predict if a student will drop out and provides recommendations to prevent it.
+  prompt: `Você é um assistente de IA que ajuda gerentes de academia a prever se um aluno irá desistir e fornece recomendações para evitar isso. Responda em português.
 
-  Analyze the following attendance records, profile data, and survey feedback (if available) to predict the dropout risk. Provide reasons for your prediction and recommendations to mitigate the risk.
+  Analise os seguintes registros de frequência, dados do perfil e feedback da pesquisa (se disponível) para prever o risco de desistência. Forneça motivos para sua previsão e recomendações para mitigar o risco.
 
-  Attendance Records:
+  Registros de Frequência:
   {{#each attendanceRecords}}
-  - Date: {{this.date}}, Attended: {{this.attended}}
+  - Data: {{this.date}}, Compareceu: {{this.attended}}
   {{/each}}
 
-  Profile Data:
-  - Age: {{profileData.age}}
-  - Fitness Goals: {{profileData.fitnessGoals}}
-  - Membership Type: {{profileData.membershipType}}
+  Dados do Perfil:
+  - Idade: {{profileData.age}}
+  - Objetivos de Fitness: {{profileData.fitnessGoals}}
+  - Tipo de Plano: {{profileData.membershipType}}
   {{#if profileData.engagementLevel}}
-  - Engagement Level: {{profileData.engagementLevel}}
+  - Nível de Engajamento: {{profileData.engagementLevel}}
   {{/if}}
 
   {{#if surveyFeedback}}
-  Latest Survey Feedback:
+  Feedback da Última Pesquisa:
   {{#if surveyFeedback.overallSatisfaction}}
-  - Overall Satisfaction (1-5): {{surveyFeedback.overallSatisfaction}}
+  - Satisfação Geral (1-5): {{surveyFeedback.overallSatisfaction}}
   {{/if}}
   {{#if surveyFeedback.likelihoodToRecommend}}
-  - Likelihood to Recommend: {{surveyFeedback.likelihoodToRecommend}}
+  - Probabilidade de Recomendar: {{surveyFeedback.likelihoodToRecommend}}
   {{/if}}
   {{#if surveyFeedback.comments}}
-  - Comments: "{{surveyFeedback.comments}}"
+  - Comentários: "{{surveyFeedback.comments}}"
   {{/if}}
   {{/if}}
 
-  Based on this information, determine the dropoutRisk (a value between 0 and 1), reasons, and recommendations.
-  Consider low satisfaction or negative comments in the survey as potential indicators of increased dropout risk.
+  Com base nessas informações, determine o dropoutRisk (um valor entre 0 e 1), os motivos (reasons) e as recomendações (recommendations).
+  Considere baixa satisfação ou comentários negativos na pesquisa como indicadores potenciais de aumento do risco de desistência.
+  Gere as razões e recomendações em português.
   `,
 });
 
@@ -97,3 +98,4 @@ const predictDropoutFlow = ai.defineFlow(
     return output!;
   }
 );
+

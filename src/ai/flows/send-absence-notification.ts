@@ -1,3 +1,4 @@
+
 // src/ai/flows/send-absence-notification.ts
 'use server';
 /**
@@ -12,19 +13,19 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SendAbsenceNotificationInputSchema = z.object({
-  studentName: z.string().describe('The name of the student.'),
-  studentId: z.string().describe('The ID of the student.'),
-  lastAttendanceDate: z.string().describe('The last date the student attended the gym. Use format YYYY-MM-DD.'),
-  missedClassesCount: z.number().describe('The number of classes the student has missed.'),
-  gymName: z.string().describe('The name of the gym.'),
+  studentName: z.string().describe('O nome do aluno.'),
+  studentId: z.string().describe('O ID do aluno.'),
+  lastAttendanceDate: z.string().describe('A última data em que o aluno frequentou a academia. Use o formato YYYY-MM-DD.'),
+  missedClassesCount: z.number().describe('O número de aulas que o aluno faltou.'),
+  gymName: z.string().describe('O nome da academia.'),
   gymContactInformation: z
     .string()
-    .describe('The contact information of the gym (phone number, email).'),
+    .describe('As informações de contato da academia (telefone, email).'),
 });
 export type SendAbsenceNotificationInput = z.infer<typeof SendAbsenceNotificationInputSchema>;
 
 const SendAbsenceNotificationOutputSchema = z.object({
-  notificationMessage: z.string().describe('The message to be sent to the student.'),
+  notificationMessage: z.string().describe('A mensagem a ser enviada ao aluno.'),
 });
 export type SendAbsenceNotificationOutput = z.infer<typeof SendAbsenceNotificationOutputSchema>;
 
@@ -36,20 +37,21 @@ const prompt = ai.definePrompt({
   name: 'sendAbsenceNotificationPrompt',
   input: {schema: SendAbsenceNotificationInputSchema},
   output: {schema: SendAbsenceNotificationOutputSchema},
-  prompt: `You are a helpful assistant that crafts personalized messages to students who have missed multiple classes at the gym.
+  prompt: `Você é um assistente prestativo que elabora mensagens personalizadas em português para alunos que faltaram a várias aulas na academia.
 
-  Given the following information, create a message to encourage the student to return to the gym.
+  Dadas as seguintes informações, crie uma mensagem para incentivar o aluno a retornar à academia.
 
-  Student Name: {{{studentName}}}
-  Student ID: {{{studentId}}}
-  Last Attendance Date: {{{lastAttendanceDate}}}
-  Missed Classes Count: {{{missedClassesCount}}}
-  Gym Name: {{{gymName}}}
-  Gym Contact Information: {{{gymContactInformation}}}
+  Nome do Aluno: {{{studentName}}}
+  ID do Aluno: {{{studentId}}}
+  Última Data de Presença: {{{lastAttendanceDate}}}
+  Número de Aulas Perdidas: {{{missedClassesCount}}}
+  Nome da Academia: {{{gymName}}}
+  Informações de Contato da Academia: {{{gymContactInformation}}}
 
-  The message should be friendly, encouraging, and highlight the benefits of returning to the gym. It should also include the gym's contact information for any questions or concerns. Suggest the student contact the gym.
-  Make the message sound human and not robotic.
-  The message should have at most 200 characters.
+  A mensagem deve ser amigável, encorajadora e destacar os benefícios de retornar à academia. Também deve incluir as informações de contato da academia para quaisquer dúvidas ou preocupações. Sugira que o aluno entre em contato com a academia.
+  Faça a mensagem soar humana e não robótica.
+  A mensagem deve ter no máximo 200 caracteres.
+  Gere a mensagem em português.
   `,
 });
 
@@ -64,3 +66,4 @@ const sendAbsenceNotificationFlow = ai.defineFlow(
     return output!;
   }
 );
+
