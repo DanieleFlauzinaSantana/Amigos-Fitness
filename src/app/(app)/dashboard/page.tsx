@@ -29,7 +29,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">78</div>
             <p className="text-xs text-muted-foreground">Média de 70 por dia</p>
-            {/* Link to detailed attendance report if available */}
+            <Link href="/checkin" className="text-sm text-primary hover:underline mt-2 block">Ver Check-ins / Registrar Presença</Link>
           </CardContent>
         </Card>
 
