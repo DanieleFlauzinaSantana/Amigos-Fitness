@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -26,7 +27,7 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl'>) => {
+  const handleSubmit = async (data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl' | 'latestSurveyResponse'>) => {
     setIsSubmitting(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -37,6 +38,7 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
       profilePictureUrl: 'https://placehold.co/100x100.png',
       attendance: [],
       missedClassesCount: 0,
+      latestSurveyResponse: undefined, // Ensure new students don't have a survey response by default
     };
     
     onStudentAdded(newStudent);
@@ -71,3 +73,4 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
     </Dialog>
   );
 }
+

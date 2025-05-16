@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,18 +15,24 @@ export default function StudentsPage() {
 
   useEffect(() => {
     // Simulate fetching data
+    // When the page loads (or re-loads after navigation),
+    // it sets the students state from the current MOCK_STUDENTS array.
+    // If MOCK_STUDENTS was mutated (e.g., by adding a new student),
+    // that change should be reflected here.
     setTimeout(() => {
-      setStudents(MOCK_STUDENTS);
+      setStudents([...MOCK_STUDENTS]); // Use spread to ensure a new array reference for react state
       setIsLoading(false);
-    }, 500);
+    }, 300); // Reduced delay
   }, []);
 
   const handleStudentAdded = (newStudent: Student) => {
+    // Update the MOCK_STUDENTS array directly.
+    // This change will persist in memory for the current session.
+    MOCK_STUDENTS.unshift(newStudent);
+    
     // Update the local state for immediate UI refresh
-    setStudents(prevStudents => [newStudent, ...prevStudents]);
-    // Also update the MOCK_STUDENTS array so the change persists
-    // across navigations (for this frontend-only mock data setup)
-    MOCK_STUDENTS.unshift(newStudent); 
+    // Re-read from MOCK_STUDENTS to ensure consistency if other direct mutations happened
+    setStudents([...MOCK_STUDENTS]); 
   };
 
   return (
@@ -53,3 +60,4 @@ export default function StudentsPage() {
     </div>
   );
 }
+
