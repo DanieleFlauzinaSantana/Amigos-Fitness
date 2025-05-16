@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   SidebarProvider,
@@ -18,10 +18,17 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/lib/constants";
-import { Dumbbell, LogOut, Settings } from "lucide-react";
+import { Dumbbell, LogOut, Settings, UserCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Simula o logout redirecionando para a página de login
+    router.push('/login');
+  };
 
   return (
     <SidebarProvider defaultOpen>
@@ -51,8 +58,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-4 border-t border-sidebar-border">
-           {/* Conteúdo do rodapé removido conforme solicitado */}
+        <SidebarFooter className="p-4 border-t border-sidebar-border space-y-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="admin avatar" />
+              <AvatarFallback>AF</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium text-sidebar-foreground">Admin</p>
+              <p className="text-xs text-sidebar-foreground/70 truncate">danielesoudapaz@hotmail.com</p>
+            </div>
+          </div>
+          <div className="flex flex-col space-y-1">
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" asChild>
+              <Link href="/settings">
+                <Settings className="mr-2 h-4 w-4" /> Configurações
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Sair
+            </Button>
+          </div>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
