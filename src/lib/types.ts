@@ -12,6 +12,7 @@ export interface Student {
   profilePictureUrl?: string;
   attendance: AttendanceRecord[];
   missedClassesCount: number;
+  latestSurveyResponse?: SurveyResponse; // Novo campo
 
   // Informações Pessoais Detalhadas
   genderIdentity?: "feminino" | "masculino" | "outro_nao_informar" | "nao_informado";
@@ -91,4 +92,12 @@ export interface DropoutPredictionResult {
   dropoutRisk: number;
   reasons: string[];
   recommendations: string[];
+}
+
+// Para o fluxo de IA de previsão de desistência, para incluir feedback da pesquisa
+export interface SurveyFeedbackForAI {
+  overallSatisfaction?: number; // e.g., from a rating question (1-5)
+  likelihoodToRecommend?: string; // e.g., Sim, Não, Talvez
+  positiveComments?: string;
+  negativeComments?: string;
 }

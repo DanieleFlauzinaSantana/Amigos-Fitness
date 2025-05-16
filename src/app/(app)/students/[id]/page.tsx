@@ -1,3 +1,4 @@
+
 // src/app/(app)/students/[id]/page.tsx
 "use client";
 
@@ -8,7 +9,8 @@ import { ProfileDetailsSection } from './components/ProfileDetailsSection';
 import { AttendanceSection } from './components/AttendanceSection';
 import { DropoutPredictionSection } from './components/DropoutPredictionSection';
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
-import { StudentIdSection } from './components/StudentIdSection'; // Importação atualizada
+import { StudentIdSection } from './components/StudentIdSection';
+import { StudentSurveyResponseSection } from './components/StudentSurveyResponseSection'; // Nova importação
 import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -83,13 +85,22 @@ export default function StudentDetailPage() {
          // Por simplicidade, vamos apenas mostrar o toast.
          toast({
           title: "Envio de Pesquisa (Simulação)",
-          description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. A pesquisa de satisfação seria enviada automaticamente.`,
+          description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. A pesquisa de satisfação (${MOCK_STUDENTS[0].latestSurveyResponse ? MOCK_STUDENTS[0].latestSurveyResponse.surveyId : 'survey1'}) seria enviada automaticamente.`,
           variant: "default",
           duration: 7000,
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => router.push(`/surveys/${MOCK_STUDENTS[0].latestSurveyResponse ? MOCK_STUDENTS[0].latestSurveyResponse.surveyId : 'survey1'}/submit?studentId=${updatedStudentData.id}`)}
+            >
+              Ver Pesquisa
+            </Button>
+          )
         });
       }
     }
-  }, [student, handleUpdateStudent, toast]);
+  }, [student, handleUpdateStudent, toast, router]);
 
 
   if (isLoading) {
@@ -132,9 +143,10 @@ export default function StudentDetailPage() {
           <AttendanceSection studentId={student.id} initialAttendance={student.attendance} onAttendanceUpdate={handleAttendanceUpdate}/>
         </div>
         <div className="lg:col-span-1 space-y-8">
-          <StudentIdSection student={student} /> {/* Componente atualizado */}
+          <StudentIdSection student={student} />
           <DropoutPredictionSection student={student} />
           <AbsenceNotificationSection student={student} />
+          <StudentSurveyResponseSection student={student} /> {/* Nova seção adicionada */}
         </div>
       </div>
     </div>

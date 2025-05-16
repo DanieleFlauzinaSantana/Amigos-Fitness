@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -5,13 +6,45 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { predictDropout, type PredictDropoutInput, type PredictDropoutOutput } from '@/ai/flows/predict-dropout';
-import type { Student, DropoutPredictionResult } from '@/lib/types';
+import type { Student, DropoutPredictionResult, SurveyFeedbackForAI } from '@/lib/types';
 import { TrendingUp, TrendingDown, AlertTriangle, Sparkles, Lightbulb, ListChecks } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
+import { MOCK_SURVEY } from '@/lib/constants'; // Para mapear IDs de perguntas
 
 interface DropoutPredictionSectionProps {
   student: Student;
 }
+
+// Helper para extrair feedback relevante da pesquisa para a IA
+const extractSurveyFeedbackForAI = (student: Student): SurveyFeedbackForAI | undefined => {
+  if (!student.latestSurveyResponse) {
+    return undefined;
+  }
+  const { answers } = student.latestSurveyResponse;
+  const feedback: SurveyFeedbackForAI = {};
+
+  // Mapeie as respostas para os campos esperados pela IA
+  // Estes IDs ('q1', 'q4', 'q5') são baseados na MOCK_SURVEY.
+  // Se a estrutura da pesquisa mudar, isso precisará ser ajustado.
+  const satisfactionAnswer = answers.find(a => a.questionId === 'q1'); // Nível de satisfação
+  if (satisfactionAnswer && typeof satisfactionAnswer.value === 'number') {
+    feedback.overallSatisfaction = satisfactionAnswer.value;
+  }
+
+  const recommendAnswer = answers.find(a => a.questionId === 'q4'); // Indicaria
+  if (recommendAnswer && typeof recommendAnswer.value === 'string') {
+    feedback.likelihoodToRecommend = recommendAnswer.value;
+  }
+
+  const commentsAnswer = answers.find(a => a.questionId === 'q5'); // Comentários
+  if (commentsAnswer && typeof commentsAnswer.value === 'string') {
+    feedback.comments = commentsAnswer.value;
+    // Você pode querer separar comentários positivos/negativos aqui se a IA for treinada para isso.
+  }
+  
+  return Object.keys(feedback).length > 0 ? feedback : undefined;
+};
+
 
 export function DropoutPredictionSection({ student }: DropoutPredictionSectionProps) {
   const [prediction, setPrediction] = useState<DropoutPredictionResult | null>(null);
@@ -23,17 +56,19 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
     setError(null);
     setPrediction(null);
 
+    const surveyFeedback = extractSurveyFeedbackForAI(student);
+
     const input: PredictDropoutInput = {
       attendanceRecords: student.attendance.map(att => ({
         date: att.date,
         attended: att.attended,
       })),
       profileData: {
-        age: student.dateOfBirth ? new Date().getFullYear() - new Date(student.dateOfBirth).getFullYear() : 30, // Estimate age if not present
-        fitnessGoals: student.fitnessGoals || "Não especificado",
+        age: student.dateOfBirth ? new Date().getFullYear() - new Date(student.dateOfBirth).getFullYear() : 30, 
+        fitnessGoals: student.mainGoal || "Não especificado", // Usando mainGoal
         membershipType: student.membershipType,
-        // engagementLevel: "medium", // Optional, can be added if available
       },
+      surveyFeedback: surveyFeedback, // Adicionando o feedback da pesquisa
     };
 
     try {
@@ -57,7 +92,7 @@ export function DropoutPredictionSection({ student }: DropoutPredictionSectionPr
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center"><Sparkles className="mr-2 h-6 w-6 text-primary" /> Previsão de Desistência (IA)</CardTitle>
-        <CardDescription>Analise o risco de desistência do aluno com base em seus dados e frequência.</CardDescription>
+        <CardDescription>Analise o risco de desistência do aluno com base em seus dados, frequência e feedback da pesquisa.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button onClick={handlePredictDropout} disabled={isLoading}>
