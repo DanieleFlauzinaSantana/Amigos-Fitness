@@ -1,3 +1,4 @@
+
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Activity, FileText, BarChart3 } from "lucide-react";
@@ -63,11 +64,11 @@ export default function DashboardPage() {
             </div>
             <div className="flex-shrink-0">
               <Image 
-                src="https://placehold.co/300x200.png" 
+                src="https://placehold.co/302x202.png" 
                 alt="Academia em atividade" 
                 data-ai-hint="gym activity" 
-                width={300} 
-                height={200}
+                width={302} 
+                height={202}
                 className="rounded-lg object-cover"
               />
             </div>
