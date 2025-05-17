@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter }      from 'next/navigation';
-import type { Survey, SurveyAnswer, SurveyQuestion } from '@/lib/types';
+import type { Survey, SurveyAnswer, SurveyQuestion, SurveyResponse, Student } from '@/lib/types'; // Adicionado Student
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -12,14 +12,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Star } from 'lucide-react';
-import { MOCK_STUDENTS } from '@/lib/constants'; // Para simular a associação ao estudante
+import { getStudentsFromLocalStorage } from '@/lib/localStorageUtils'; // Importado
 
 interface SurveySubmissionFormProps {
   survey: Survey;
-  studentId?: string | null; // studentId from query param
+  studentId?: string | null;
+  onSurveySubmitted?: (surveyResponse: SurveyResponse) => void; // Callback para informar que a pesquisa foi submetida
 }
 
-export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionFormProps) {
+export function SurveySubmissionForm({ survey, studentId, onSurveySubmitted }: SurveySubmissionFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
@@ -28,7 +29,8 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
 
   useEffect(() => {
     if (studentId) {
-      const student = MOCK_STUDENTS.find(s => s.id === studentId);
+      const students = getStudentsFromLocalStorage(); // Busca do localStorage
+      const student = students.find(s => s.id === studentId);
       if (student) {
         setStudentName(student.name);
       }
@@ -49,23 +51,17 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
       value,
     }));
 
-    const submissionData = {
+    const submissionData: SurveyResponse = { // Tipo explícito
       surveyId: survey.id,
-      studentId: studentId || undefined,
+      studentId: studentId || undefined, // Garante que seja string ou undefined
       submittedAt: new Date().toISOString(),
       answers: surveyAnswers,
     };
     
-    console.log("Submitting survey (internal):", submissionData);
+    console.log("Submitting survey (localStorage):", submissionData);
 
-    // Simulação: Se studentId existir, tentar atualizar o MOCK_STUDENTS
-    // Esta é uma simulação e não persiste dados reais.
-    if (studentId) {
-        const studentIndex = MOCK_STUDENTS.findIndex(s => s.id === studentId);
-        if (studentIndex !== -1) {
-            MOCK_STUDENTS[studentIndex].latestSurveyResponse = submissionData;
-            console.log(`Simulação: Resposta da pesquisa associada ao aluno ${MOCK_STUDENTS[studentIndex].name}`);
-        }
+    if (onSurveySubmitted) {
+      onSurveySubmitted(submissionData);
     }
 
     await new Promise(resolve => setTimeout(resolve, 1000)); 
@@ -76,7 +72,6 @@ export function SurveySubmissionForm({ survey, studentId }: SurveySubmissionForm
     });
     setIsLoading(false);
     
-    // Redireciona para a página do aluno se um ID foi fornecido, caso contrário, para a página de pesquisas.
     router.push(studentId ? `/students/${studentId}` : '/surveys');
   };
 

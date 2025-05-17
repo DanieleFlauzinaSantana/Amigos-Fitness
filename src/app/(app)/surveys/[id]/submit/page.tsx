@@ -8,6 +8,8 @@ import { MOCK_SURVEY } from '@/lib/constants';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Frown } from 'lucide-react';
+import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from '@/lib/localStorageUtils';
+import type { Student, SurveyResponse } from '@/lib/types';
 
 export default function SurveySubmitPage() {
   const params = useParams();
@@ -16,6 +18,18 @@ export default function SurveySubmitPage() {
   const studentId = searchParams.get('studentId');
 
   const surveyToSubmit = surveyId === MOCK_SURVEY.id ? MOCK_SURVEY : null;
+
+  const handleSurveySubmitted = (surveyResponse: SurveyResponse) => {
+    if (studentId) {
+      const students = getStudentsFromLocalStorage();
+      const studentIndex = students.findIndex(s => s.id === studentId);
+      if (studentIndex !== -1) {
+        students[studentIndex].latestSurveyResponse = surveyResponse;
+        saveStudentsToLocalStorage(students);
+        console.log(`Simulação: Resposta da pesquisa associada ao aluno ${students[studentIndex].name} e salva no localStorage.`);
+      }
+    }
+  };
 
   if (!surveyToSubmit) {
     return (
@@ -34,7 +48,11 @@ export default function SurveySubmitPage() {
 
   return (
     <div className="container mx-auto">
-      <SurveySubmissionForm survey={surveyToSubmit} studentId={studentId} />
+      <SurveySubmissionForm 
+        survey={surveyToSubmit} 
+        studentId={studentId} 
+        onSurveySubmitted={handleSurveySubmitted} 
+      />
     </div>
   );
 }

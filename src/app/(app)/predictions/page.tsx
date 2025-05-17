@@ -1,24 +1,23 @@
+
 // src/app/(app)/predictions/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { StudentTable } from "@/app/(app)/students/components/StudentTable"; // Reutilizando a tabela de estudantes
-import { MOCK_STUDENTS } from "@/lib/constants";
+import { StudentTable } from "@/app/(app)/students/components/StudentTable";
 import type { Student } from "@/lib/types";
 import { AlertTriangle } from "lucide-react";
+import { getStudentsFromLocalStorage } from "@/lib/localStorageUtils";
 
 export default function PredictionsListPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching data
-    setTimeout(() => {
-      setStudents(MOCK_STUDENTS);
-      setIsLoading(false);
-    }, 300); // Reduced delay for faster loading
+    const loadedStudents = getStudentsFromLocalStorage();
+    setStudents(loadedStudents);
+    setIsLoading(false);
   }, []);
 
   return (

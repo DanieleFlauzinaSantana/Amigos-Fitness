@@ -6,33 +6,27 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { StudentTable } from "./components/StudentTable";
 import { AddStudentDialog } from "./components/AddStudentDialog";
-import { MOCK_STUDENTS } from "@/lib/constants";
 import type { Student } from "@/lib/types";
+import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from "@/lib/localStorageUtils";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching data
-    // When the page loads (or re-loads after navigation),
-    // it sets the students state from the current MOCK_STUDENTS array.
-    // If MOCK_STUDENTS was mutated (e.g., by adding a new student),
-    // that change should be reflected here.
-    setTimeout(() => {
-      setStudents([...MOCK_STUDENTS]); // Use spread to ensure a new array reference for react state
-      setIsLoading(false);
-    }, 300); // Reduced delay
+    // Carrega os alunos do localStorage na montagem do componente
+    const loadedStudents = getStudentsFromLocalStorage();
+    setStudents(loadedStudents);
+    setIsLoading(false);
   }, []);
 
   const handleStudentAdded = (newStudent: Student) => {
-    // Update the MOCK_STUDENTS array directly.
-    // This change will persist in memory for the current session.
-    MOCK_STUDENTS.unshift(newStudent);
-    
-    // Update the local state for immediate UI refresh
-    // Re-read from MOCK_STUDENTS to ensure consistency if other direct mutations happened
-    setStudents([...MOCK_STUDENTS]); 
+    // Adiciona o novo aluno à lista atual e salva no localStorage
+    setStudents(prevStudents => {
+      const updatedStudents = [newStudent, ...prevStudents];
+      saveStudentsToLocalStorage(updatedStudents);
+      return updatedStudents;
+    });
   };
 
   return (
@@ -60,4 +54,3 @@ export default function StudentsPage() {
     </div>
   );
 }
-

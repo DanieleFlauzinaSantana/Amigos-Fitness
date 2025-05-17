@@ -1,3 +1,4 @@
+
 // src/app/(app)/predictions/[id]/page.tsx
 "use client";
 
@@ -6,11 +7,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { DropoutPredictionSection } from '@/app/(app)/students/[id]/components/DropoutPredictionSection';
 import { AbsenceNotificationSection } from '@/app/(app)/students/[id]/components/AbsenceNotificationSection';
-import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getStudentsFromLocalStorage } from '@/lib/localStorageUtils';
 
 export default function StudentPredictionFocusPage() {
   const router = useRouter();
@@ -23,18 +24,15 @@ export default function StudentPredictionFocusPage() {
   useEffect(() => {
     if (studentId) {
       setIsLoading(true);
-      // Simular busca de dados
-      setTimeout(() => {
-        const foundStudent = MOCK_STUDENTS.find(s => s.id === studentId);
-        if (foundStudent) {
-          setStudent(foundStudent);
-        } else {
-          // Idealmente, mostrar uma página de não encontrado ou redirecionar
-          console.error("Aluno não encontrado para predição:", studentId);
-          router.push('/predictions'); 
-        }
-        setIsLoading(false);
-      }, 300);
+      const studentsFromStorage = getStudentsFromLocalStorage();
+      const foundStudent = studentsFromStorage.find(s => s.id === studentId);
+      if (foundStudent) {
+        setStudent(foundStudent);
+      } else {
+        console.error("Aluno não encontrado para predição:", studentId);
+        router.push('/predictions'); 
+      }
+      setIsLoading(false);
     }
   }, [studentId, router]);
 

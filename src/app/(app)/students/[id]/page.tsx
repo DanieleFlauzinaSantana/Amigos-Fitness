@@ -11,17 +11,17 @@ import { DropoutPredictionSection } from './components/DropoutPredictionSection'
 import { AbsenceNotificationSection } from './components/AbsenceNotificationSection';
 import { StudentIdSection } from './components/StudentIdSection';
 import { StudentSurveyResponseSection } from './components/StudentSurveyResponseSection';
-import { MOCK_STUDENTS, MOCK_SURVEY } from '@/lib/constants';
-import type { Student, AttendanceRecord } from '@/lib/types';
+import type { Student, AttendanceRecord, SurveyResponse } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { calculateConsecutiveAbsences } from '@/lib/utils';
 import { ABSENCE_THRESHOLD } from '@/lib/config';
+import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from '@/lib/localStorageUtils';
+import { MOCK_SURVEY } from '@/lib/constants'; // Para o link da pesquisa
 
 const CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK = 5;
-
 
 export default function StudentDetailPage() {
   const router = useRouter();
@@ -31,30 +31,40 @@ export default function StudentDetailPage() {
 
   const [student, setStudent] = useState<Student | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
 
   useEffect(() => {
+    const studentsFromStorage = getStudentsFromLocalStorage();
+    setAllStudents(studentsFromStorage);
     if (studentId) {
       setIsLoading(true);
-      setTimeout(() => {
-        const foundStudent = MOCK_STUDENTS.find(s => s.id === studentId);
-        if (foundStudent) {
-          setStudent(foundStudent);
-        } else {
-          router.push('/students'); 
-        }
-        setIsLoading(false);
-      }, 500);
+      const foundStudent = studentsFromStorage.find(s => s.id === studentId);
+      if (foundStudent) {
+        setStudent(foundStudent);
+      } else {
+        // Se não encontrar, pode ser útil redirecionar ou mostrar erro
+        // Por enquanto, vamos manter como estava, mas idealmente trataria melhor
+        console.warn("Aluno não encontrado no localStorage:", studentId);
+        router.push('/students'); 
+      }
+      setIsLoading(false);
     }
   }, [studentId, router]);
 
+  const updateStudentsInStorage = (updatedStudentsList: Student[]) => {
+    setAllStudents(updatedStudentsList);
+    saveStudentsToLocalStorage(updatedStudentsList);
+  };
+
   const handleUpdateStudent = useCallback((updatedStudent: Student) => {
-    setStudent(updatedStudent);
-    const studentIndex = MOCK_STUDENTS.findIndex(s => s.id === updatedStudent.id);
+    setStudent(updatedStudent); // Atualiza o estado local do aluno sendo visualizado
+    const studentIndex = allStudents.findIndex(s => s.id === updatedStudent.id);
     if (studentIndex !== -1) {
-      MOCK_STUDENTS[studentIndex] = updatedStudent;
+      const newStudentsList = [...allStudents];
+      newStudentsList[studentIndex] = updatedStudent;
+      updateStudentsInStorage(newStudentsList);
     }
-  }, []);
+  }, [allStudents]);
   
   const handleAttendanceUpdate = useCallback((newAttendance: AttendanceRecord[]) => {
     if (student) {
@@ -64,8 +74,8 @@ export default function StudentDetailPage() {
         attendance: newAttendance,
         missedClassesCount: newAttendance.filter(att => !att.attended && new Date(att.date) > new Date(student.joinDate)).length
       };
-      setStudent(updatedStudentData);
-      handleUpdateStudent(updatedStudentData);
+      
+      handleUpdateStudent(updatedStudentData); // Isso salvará no localStorage
 
       if (updatedStudentData.missedClassesCount >= ABSENCE_THRESHOLD && oldMissedCount < ABSENCE_THRESHOLD) {
         toast({
@@ -77,7 +87,7 @@ export default function StudentDetailPage() {
       }
 
       const consecutiveAbsences = calculateConsecutiveAbsences(updatedStudentData.attendance);
-      if (consecutiveAbsences >= CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK && !student.latestSurveyResponse) { // Adicionado cheque para evitar spam de toast se já respondeu
+      if (consecutiveAbsences >= CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK && !student.latestSurveyResponse) {
          toast({
           title: "Lembrete de Envio de Pesquisa (Simulação)",
           description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. Considere enviar o link da pesquisa de satisfação.`,
@@ -96,6 +106,17 @@ export default function StudentDetailPage() {
       }
     }
   }, [student, handleUpdateStudent, toast, router]);
+
+  // Função para atualizar a resposta da pesquisa do aluno
+  const handleSurveyResponseUpdate = useCallback((surveyResponse: SurveyResponse) => {
+    if (student) {
+      const updatedStudentData = {
+        ...student,
+        latestSurveyResponse: surveyResponse,
+      };
+      handleUpdateStudent(updatedStudentData);
+    }
+  }, [student, handleUpdateStudent]);
 
 
   if (isLoading) {

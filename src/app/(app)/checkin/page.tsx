@@ -1,24 +1,31 @@
+
 // src/app/(app)/checkin/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { MOCK_STUDENTS } from '@/lib/constants';
 import type { Student, AttendanceRecord } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { ClipboardCheck, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardCheck, CheckCircle } from 'lucide-react';
+import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from '@/lib/localStorageUtils';
 
 export default function CheckinPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [studentIdInput, setStudentIdInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+
+  useEffect(() => {
+    const studentsFromStorage = getStudentsFromLocalStorage();
+    setAllStudents(studentsFromStorage);
+  }, []);
 
   const handleCheckin = () => {
     if (!studentIdInput.trim()) {
@@ -32,8 +39,10 @@ export default function CheckinPage() {
 
     setIsLoading(true);
 
+    // Simula um pequeno delay para a operação
     setTimeout(() => {
-      const studentIndex = MOCK_STUDENTS.findIndex(s => s.id === studentIdInput.trim());
+      const currentStudents = getStudentsFromLocalStorage(); // Pega a lista mais atual
+      const studentIndex = currentStudents.findIndex(s => s.id === studentIdInput.trim());
 
       if (studentIndex === -1) {
         toast({
@@ -45,7 +54,7 @@ export default function CheckinPage() {
         return;
       }
 
-      const student = MOCK_STUDENTS[studentIndex];
+      const student = currentStudents[studentIndex];
       const todayFormatted = format(new Date(), 'yyyy-MM-dd');
       const hasCheckedInToday = student.attendance.some(
         record => record.date === todayFormatted && record.attended
@@ -58,8 +67,6 @@ export default function CheckinPage() {
           description: `${student.name}, seu check-in de hoje já foi registrado.`,
         });
         setIsLoading(false);
-        // Poderia redirecionar para uma página de boas-vindas ou manter na mesma.
-        // router.push(`/students/${student.id}`); 
         return;
       }
 
@@ -72,19 +79,18 @@ export default function CheckinPage() {
       const updatedStudent: Student = {
         ...student,
         attendance: updatedAttendance,
+        // Recalcula missedClassesCount se necessário aqui ou no perfil do aluno
+        missedClassesCount: updatedAttendance.filter(att => !att.attended && new Date(att.date) > new Date(student.joinDate)).length
       };
 
-      MOCK_STUDENTS[studentIndex] = updatedStudent;
+      const updatedStudentsList = [...currentStudents];
+      updatedStudentsList[studentIndex] = updatedStudent;
+      saveStudentsToLocalStorage(updatedStudentsList);
+      setAllStudents(updatedStudentsList); // Atualiza o estado local se necessário para re-renderizações
 
       toast({
         title: 'Check-in Confirmado!',
         description: `Olá ${student.name}! Sua presença foi registrada para ${format(new Date(), 'dd/MM/yyyy')}.`,
-        // Ação de ver aluno pode não ser relevante para o aluno fazendo check-in.
-        // action: (
-        //   <Button variant="outline" size="sm" onClick={() => router.push(`/students/${student.id}`)}>
-        //     Ver Aluno
-        //   </Button>
-        // ),
       });
       
       setStudentIdInput(''); 
@@ -114,7 +120,6 @@ export default function CheckinPage() {
               value={studentIdInput}
               onChange={(e) => setStudentIdInput(e.target.value)}
               disabled={isLoading}
-              // Adicionando autoFocus para conveniência em totens
               autoFocus 
             />
           </div>
