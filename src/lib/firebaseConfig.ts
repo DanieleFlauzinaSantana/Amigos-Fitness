@@ -1,10 +1,10 @@
 // src/lib/firebaseConfig.ts
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
-// Se você for usar Autenticação no futuro, descomente a linha abaixo:
-// import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, type Auth } from "firebase/auth"; // Adicionado Auth
 
-// Configuração do Firebase do seu projeto
+// Sua configuração do Firebase, obtida do Console do Firebase
+// SUBSTITUA PELOS SEUS VALORES REAIS SE FOREM DIFERENTES
 const firebaseConfig = {
   apiKey: "AIzaSyCvQCQbE1W3rmRJY_s1Bs40z7qDb0QZQcA",
   authDomain: "amigosfitnessapp.firebaseapp.com",
@@ -12,7 +12,7 @@ const firebaseConfig = {
   storageBucket: "amigosfitnessapp.firebasestorage.app",
   messagingSenderId: "1006839428846",
   appId: "1:1006839428846:web:e8e44c64289576570725ff"
-  // measurementId: "SEU_MEASUREMENT_ID_AQUI" // Opcional, adicione se você configurou o Google Analytics
+  // measurementId: "SEU_MEASUREMENT_ID_AQUI" // Opcional
 };
 
 // Inicializar o Firebase App
@@ -26,8 +26,8 @@ if (!getApps().length) {
 // Inicializar o Firestore
 const db: Firestore = getFirestore(app);
 
-// Se você for usar Autenticação no futuro, descomente a linha abaixo:
-// const auth: Auth = getAuth(app);
+// Inicializar o Firebase Authentication
+const auth: Auth = getAuth(app); // Criada a instância de Auth
 
 // Exportar as instâncias para serem usadas em outras partes do app
-export { app, db /*, auth */ };
+export { app, db, auth }; // Exportado auth

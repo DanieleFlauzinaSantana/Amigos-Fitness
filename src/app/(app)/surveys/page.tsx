@@ -1,99 +1,149 @@
 
+// src/app/(app)/layout.tsx
 "use client";
 
 import Link from "next/link";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, Edit, Send, BarChart3 } from "lucide-react";
-import { MOCK_SURVEY } from "@/lib/constants";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useState } from 'react';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { NAV_LINKS } from "@/lib/constants";
+import { Dumbbell, LogOut, Settings, UserCircle, Loader2 } from "lucide-react"; 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/AuthContext"; 
+import { useEffect } from "react"; 
 
-
-export default function SurveysPage() {
-  const survey = MOCK_SURVEY; 
-  const [origin, setOrigin] = useState('');
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { currentUser, logout, loading: authLoading } = useAuth(); 
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin);
+    if (!authLoading && !currentUser) {
+      router.push('/login'); 
     }
-  }, []);
+  }, [currentUser, authLoading, router]);
 
-  const surveySubmitLink = origin ? `${origin}/surveys/${survey.id}/submit` : `/surveys/${survey.id}/submit`;
-  const surveyResultsLink = `/surveys/${survey.id}/results`;
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // O AuthContext já redireciona para /login após o logout bem-sucedido
+      // ou o useEffect acima cuidará disso quando currentUser se tornar null.
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      // Mesmo com erro, tentar redirecionar, embora o AuthContext possa já ter feito.
+      router.push('/login');
+    }
+  };
 
+  if (authLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4 text-lg text-muted-foreground">Carregando aplicação...</p>
+      </div>
+    );
+  }
+  
+  // Se não está carregando e não há usuário, o useEffect acima já deve ter redirecionado.
+  // Mas, para evitar um flash de conteúdo não autenticado, podemos retornar um loader simples
+  // ou null aqui também, embora o redirecionamento deva ser rápido.
+  if (!currentUser) {
+    return (
+       <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4 text-lg text-muted-foreground">Redirecionando para login...</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <PageHeader title="Pesquisas de Satisfação" description="Gerencie e analise o feedback dos seus alunos." />
-      
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-1 md:col-span-2 lg:col-span-3">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl flex items-center"><FileText className="mr-2 h-5 w-5 text-primary"/>{survey.title}</CardTitle>
-              <div className="flex space-x-2">
+    <SidebarProvider defaultOpen>
+      <Sidebar>
+        <SidebarHeader className="p-4">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Dumbbell className="h-8 w-8 text-sidebar-foreground" />
+            <h1 className="text-xl font-semibold text-sidebar-foreground">Amigos Fitness</h1>
+          </Link>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarMenu>
+            {NAV_LINKS.map((link) => (
+              <SidebarMenuItem key={link.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={link.exact ? pathname === link.href : pathname.startsWith(link.href)}
+                  className="justify-start"
+                  tooltip={{ children: link.label, className: "bg-sidebar-accent text-sidebar-accent-foreground" }}
+                >
+                  <Link href={link.href}>
+                    <link.icon />
+                    <span>{link.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter className="p-4 border-t border-sidebar-border space-y-3">
+          {currentUser && (
+            <>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={currentUser.photoURL || "https://placehold.co/40x40.png"} alt={currentUser.displayName || currentUser.email || "Admin"} data-ai-hint="admin avatar"/>
+                  <AvatarFallback>
+                    {currentUser.email ? currentUser.email[0].toUpperCase() : "A"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium text-sidebar-foreground">{currentUser.displayName || "Admin"}</p>
+                  <p className="text-xs text-sidebar-foreground/70 truncate max-w-[150px]">{currentUser.email}</p>
+                </div>
+              </div>
+              <div className="flex flex-col space-y-1">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" disabled> 
-                        <Edit className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" /> Sair
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Edição das perguntas é feita no código (src/lib/constants.ts)</p>
+                    <TooltipContent side="right" align="center" className="bg-sidebar-accent text-sidebar-accent-foreground">
+                      <p>Encerrar sessão e voltar para tela de login</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <Button variant="outline" size="icon" asChild>
-                  <Link href={surveyResultsLink}>
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="sr-only">Ver Respostas (Simulado)</span>
-                  </Link>
-                </Button>
               </div>
+            </>
+          )}
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md md:px-6 lg:px-8">
+            <div className="md:hidden">
+                <SidebarTrigger />
             </div>
-            <CardDescription>
-              {survey.description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col md:flex-row gap-6 items-center">
-            <div className="flex-1">
-                <h3 className="font-semibold mb-1">Link para Responder (Interno):</h3>
-                <p className="text-sm text-muted-foreground">
-                    Use o link abaixo para que os alunos respondam à pesquisa dentro do sistema. Para associar a resposta a um aluno específico (e usar na IA), adicione `?studentId=ID_DO_ALUNO` ao final do link (isso já é feito automaticamente na página do aluno).
-                </p>
-                <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline break-all mt-1 block">
-                    {surveySubmitLink}
-                </Link>
-                 <p className="text-xs text-muted-foreground mt-2">Exemplo com ID do aluno: {`${surveySubmitLink}?studentId=ALUNO_ID_AQUI`}</p>
+            <div className="flex-1 text-center md:text-left">
+                {/* Breadcrumbs or dynamic title can go here */}
             </div>
-             <Image 
-              src="https://placehold.co/200x150.png" 
-              alt="Ilustração de pesquisa" 
-              data-ai-hint="survey feedback" 
-              width={200} 
-              height={150} 
-              className="rounded-lg object-cover"
-            />
-          </CardContent>
-          <CardFooter>
-            <Button asChild className="w-full md:w-auto">
-              <Link href={surveySubmitLink} target="_blank" rel="noopener noreferrer">
-                <Send className="mr-2 h-4 w-4" /> Abrir Formulário da Pesquisa (Interno)
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
+            {/* Additional header actions can go here */}
+        </header>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
+            {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
