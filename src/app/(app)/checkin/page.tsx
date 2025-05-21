@@ -1,4 +1,3 @@
-
 // src/app/(app)/checkin/page.tsx
 "use client";
 
@@ -13,21 +12,16 @@ import type { Student, AttendanceRecord } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ClipboardCheck, CheckCircle } from 'lucide-react';
-import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from '@/lib/localStorageUtils';
+import { getStudentById, updateStudent } from '@/lib/studentService'; // Alterado para usar studentService
 
 export default function CheckinPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [studentIdInput, setStudentIdInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  // Removido o estado allStudents, pois não vamos mais carregar todos os alunos aqui.
 
-  useEffect(() => {
-    const studentsFromStorage = getStudentsFromLocalStorage();
-    setAllStudents(studentsFromStorage);
-  }, []);
-
-  const handleCheckin = () => {
+  const handleCheckin = async () => {
     if (!studentIdInput.trim()) {
       toast({
         variant: 'destructive',
@@ -39,22 +33,20 @@ export default function CheckinPage() {
 
     setIsLoading(true);
 
-    // Simula um pequeno delay para a operação
-    setTimeout(() => {
-      const currentStudents = getStudentsFromLocalStorage(); // Pega a lista mais atual
-      const studentIndex = currentStudents.findIndex(s => s.id === studentIdInput.trim());
+    try {
+      const studentId = studentIdInput.trim();
+      const student = await getStudentById(studentId);
 
-      if (studentIndex === -1) {
+      if (!student) {
         toast({
           variant: 'destructive',
           title: 'Aluno Não Encontrado',
-          description: `Nenhum aluno encontrado com o Número de Inscrição: ${studentIdInput}. Verifique o número e tente novamente.`,
+          description: `Nenhum aluno encontrado com o Número de Inscrição: ${studentId}. Verifique o número e tente novamente.`,
         });
         setIsLoading(false);
         return;
       }
 
-      const student = currentStudents[studentIndex];
       const todayFormatted = format(new Date(), 'yyyy-MM-dd');
       const hasCheckedInToday = student.attendance.some(
         record => record.date === todayFormatted && record.attended
@@ -71,31 +63,48 @@ export default function CheckinPage() {
       }
 
       const newAttendanceRecord: AttendanceRecord = { date: todayFormatted, attended: true };
-      const updatedAttendance = [
+      // Adiciona o novo registro e remove qualquer registro anterior para o mesmo dia (caso exista um com attended: false)
+      const updatedAttendanceUnsorted = [
         ...student.attendance.filter(record => record.date !== todayFormatted),
         newAttendanceRecord
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      ];
+      // Ordena para manter a consistência (mais recentes primeiro)
+      const updatedAttendance = updatedAttendanceUnsorted.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-      const updatedStudent: Student = {
-        ...student,
+
+      const newMissedClassesCount = updatedAttendance.filter(att => !att.attended && new Date(att.date) > new Date(student.joinDate)).length;
+
+      const updatedStudentData: Partial<Omit<Student, 'id'>> = {
         attendance: updatedAttendance,
-        // Recalcula missedClassesCount se necessário aqui ou no perfil do aluno
-        missedClassesCount: updatedAttendance.filter(att => !att.attended && new Date(att.date) > new Date(student.joinDate)).length
+        missedClassesCount: newMissedClassesCount,
       };
 
-      const updatedStudentsList = [...currentStudents];
-      updatedStudentsList[studentIndex] = updatedStudent;
-      saveStudentsToLocalStorage(updatedStudentsList);
-      setAllStudents(updatedStudentsList); // Atualiza o estado local se necessário para re-renderizações
+      const updatedStudent = await updateStudent(student.id, updatedStudentData);
 
+      if (updatedStudent) {
+        toast({
+          title: 'Check-in Confirmado!',
+          description: `Olá ${updatedStudent.name}! Sua presença foi registrada para ${format(new Date(), 'dd/MM/yyyy')}.`,
+        });
+        setStudentIdInput('');
+      } else {
+        // Isso não deveria acontecer se updateStudent estiver correto e o aluno existir
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao Salvar Check-in',
+          description: 'Não foi possível salvar o check-in. Tente novamente.',
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao processar check-in:", error);
       toast({
-        title: 'Check-in Confirmado!',
-        description: `Olá ${student.name}! Sua presença foi registrada para ${format(new Date(), 'dd/MM/yyyy')}.`,
+        variant: 'destructive',
+        title: 'Erro no Check-in',
+        description: 'Ocorreu um erro ao registrar sua presença. Tente novamente.',
       });
-      
-      setStudentIdInput(''); 
+    } finally {
       setIsLoading(false);
-    }, 700); 
+    }
   };
 
   return (

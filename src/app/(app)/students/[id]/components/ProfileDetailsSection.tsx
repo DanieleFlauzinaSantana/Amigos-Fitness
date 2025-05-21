@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,9 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { StudentForm } from '../../components/StudentForm';
 import type { Student } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard, Binary, HeartHandshake, DollarSign, GraduationCap, Contact, Lightbulb, AlertTriangle } from 'lucide-react'; 
+import { Edit3, User, Mail, Phone, Cake, Shield, Users as UsersIcon, CalendarDays, Snowflake, Building2, Clock, Target, HeartPulse, HelpCircle, FileTextIcon, Tag, Briefcase, Hourglass, Users2, TrendingUp, MessageCircle, Smartphone, BookOpen, CreditCard, Binary, HeartHandshake, DollarSign, GraduationCap, Contact, Lightbulb, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
+import { updateStudent } from '@/lib/studentService'; // Importar a função de atualização
 
 const DetailItem = ({ icon: Icon, label, value, fullWidth = false }: { icon?: React.ElementType, label: string, value?: string | React.ReactNode, fullWidth?: boolean }) => (
   <div className={`flex items-start space-x-3 ${fullWidth ? 'md:col-span-2' : ''}`}>
@@ -30,24 +29,64 @@ const SectionTitleDisplay: React.FC<{ children: React.ReactNode, icon?: React.El
   </h3>
 );
 
+interface ProfileDetailsSectionProps {
+  student: Student;
+  onUpdateStudent: (updatedStudent: Student) => void; 
+}
 
-export function ProfileDetailsSection({ student, onUpdateStudent }: { student: Student, onUpdateStudent: (updatedStudent: Student) => void;}) {
+export function ProfileDetailsSection({ student, onUpdateStudent }: ProfileDetailsSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleFormSubmit = async (data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl'>) => {
+  useEffect(() => {
+    if (student) {
+      console.log("[ProfileDetailsSection] Student prop recebido:", JSON.stringify(student, null, 2));
+    }
+  }, [student]);
+
+  const handleFormSubmit = async (data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl' | 'latestSurveyResponse'>) => {
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const updatedStudentData = { ...student, ...data };
-    onUpdateStudent(updatedStudentData);
-    setIsSubmitting(false);
-    setIsEditing(false);
-    toast({
-      title: "Perfil Atualizado!",
-      description: `Os dados de ${student.name} foram atualizados.`,
-    });
+    try {
+      if (!student || !student.id) {
+        toast({
+          variant: "destructive",
+          title: "Erro Crítico",
+          description: "ID do aluno não encontrado para atualização. Verifique os logs do console do navegador.",
+        });
+        console.error("[ProfileDetailsSection] Tentativa de submeter formulário sem student.id. Student atual:", student);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log(`[ProfileDetailsSection] Submetendo formulário para student.id: ${student.id} com dados:`, data);
+      const updatedStudentData = await updateStudent(student.id, data);
+      
+      if (updatedStudentData) {
+        onUpdateStudent(updatedStudentData); 
+        toast({
+          title: "Perfil Atualizado!",
+          description: `Os dados de ${updatedStudentData.name} foram atualizados com sucesso.`,
+        });
+        setIsEditing(false); 
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro ao Atualizar",
+          description: "Não foi possível salvar as alterações. Verifique os logs do terminal (npm run dev).",
+        });
+        console.error(`[ProfileDetailsSection] updateStudent retornou undefined para student.id: ${student.id}`);
+      }
+    } catch (error) {
+      console.error("[ProfileDetailsSection] Erro ao atualizar perfil do aluno:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao Atualizar",
+        description: "Ocorreu um erro inesperado. Verifique os logs do terminal (npm run dev).",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatYesNoNotInformated = (value?: "sim" | "nao" | "nao_informado" | "talvez") => {
@@ -153,29 +192,40 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
     nao_informado: "Não informado"
   };
 
+  if (!student) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Carregando perfil do aluno...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Aguarde enquanto os dados do aluno são carregados.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-start justify-between">
         <div>
           <CardTitle className="text-2xl">Perfil Completo do Aluno</CardTitle>
           <CardDescription>Informações detalhadas, preferências e histórico.</CardDescription>
         </div>
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label="Editar Perfil">
               <Edit3 className="h-4 w-4" />
-              <span className="sr-only">Editar Perfil</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto"> {/* Ajustado para 90vh e overflow */}
             <DialogHeader>
               <DialogTitle>Editar Perfil de {student.name}</DialogTitle>
             </DialogHeader>
             <StudentForm 
               student={student} 
               onSubmit={handleFormSubmit} 
-              onCancel={() => setIsEditing(false)}
+              onCancel={() => setIsEditing(false)} 
               isSubmitting={isSubmitting}
             />
           </DialogContent>
@@ -203,7 +253,7 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
           <SectionTitleDisplay icon={User}>Informações Pessoais Básicas</SectionTitleDisplay>
           <DetailItem icon={Cake} label="Data de Nascimento" value={student.dateOfBirth ? new Date(student.dateOfBirth + 'T00:00:00').toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : undefined} />
-          <DetailItem icon={CalendarDays} label="Data de Início na Academia" value={new Date(student.joinDate + 'T00:00:00').toLocaleDateString('pt-BR', {timeZone: 'UTC'})} />
+          <DetailItem icon={CalendarDays} label="Data de Início na Academia" value={student.joinDate ? new Date(student.joinDate + 'T00:00:00').toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : 'Não informada'} />
           <DetailItem icon={Tag} label="Tipo de Plano (Academia)" value={formatDisplayValue(student.membershipType, membershipTypeMap)} />
           <DetailItem icon={Shield} label="Contato de Emergência" value={`${student.emergencyContactName || ''} ${student.emergencyContactPhone || ''}`.trim() || undefined} />
 
@@ -216,7 +266,6 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
           <DetailItem icon={GraduationCap} label="Nível de Escolaridade" value={formatDisplayValue(student.educationLevel, educationLevelMap)} />
           <DetailItem icon={Snowflake} label="Gosta de Inverno?" value={formatYesNoNotInformated(student.likesWinter)} />
           
-
           <SectionTitleDisplay icon={Clock}>🕒 Rotina e Disponibilidade</SectionTitleDisplay>
           <DetailItem icon={Hourglass} label="Melhor horário para treinar" value={formatDisplayValue(student.bestTrainingTime, bestTrainingTimeMap)} />
           <DetailItem icon={CalendarDays} label="Dias por semana (pretensão)" value={student.daysPerWeek} />
@@ -258,3 +307,5 @@ export function ProfileDetailsSection({ student, onUpdateStudent }: { student: S
     </Card>
   );
 }
+
+

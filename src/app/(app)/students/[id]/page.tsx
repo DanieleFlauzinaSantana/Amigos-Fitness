@@ -1,4 +1,3 @@
-
 // src/app/(app)/students/[id]/page.tsx
 "use client";
 
@@ -18,10 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { calculateConsecutiveAbsences } from '@/lib/utils';
 import { ABSENCE_THRESHOLD } from '@/lib/config';
-import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from '@/lib/localStorageUtils';
+// Removido localStorageUtils, usaremos studentService
+import { getStudentById, updateStudent } from '@/lib/studentService'; 
 import { MOCK_SURVEY } from '@/lib/constants'; 
 
-const CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK = 5; // Ajustado de volta para um valor exemplo
+const CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK = 5;
 
 export default function StudentDetailPage() {
   const router = useRouter();
@@ -31,89 +31,98 @@ export default function StudentDetailPage() {
 
   const [student, setStudent] = useState<Student | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // Removido allStudents do estado local desta página, pois a leitura sempre será do localStorage
 
-  useEffect(() => {
+  const fetchStudentData = useCallback(async () => {
     if (studentId) {
       setIsLoading(true);
-      const studentsFromStorage = getStudentsFromLocalStorage();
-      const foundStudent = studentsFromStorage.find(s => s.id === studentId);
-      if (foundStudent) {
-        setStudent(foundStudent);
-      } else {
-        console.warn("Aluno não encontrado no localStorage:", studentId);
-        toast({ variant: "destructive", title: "Erro", description: "Aluno não encontrado." });
-        router.push('/students'); 
+      try {
+        const foundStudent = await getStudentById(studentId);
+        if (foundStudent) {
+          setStudent(foundStudent);
+        } else {
+          console.warn("Aluno não encontrado no Firestore:", studentId);
+          toast({ variant: "destructive", title: "Erro", description: "Aluno não encontrado." });
+          router.push('/students'); 
+        }
+      } catch (error) {
+        console.error("Erro ao buscar aluno do Firestore:", error);
+        toast({ variant: "destructive", title: "Erro ao Carregar", description: "Não foi possível carregar os dados do aluno." });
+        router.push('/students');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   }, [studentId, router, toast]);
 
-  const updateStudentInStorageAndState = useCallback((updatedStudent: Student) => {
-    const studentsFromStorage = getStudentsFromLocalStorage();
-    const studentIndex = studentsFromStorage.findIndex(s => s.id === updatedStudent.id);
-    let newStudentsList = [...studentsFromStorage];
-    if (studentIndex !== -1) {
-      newStudentsList[studentIndex] = updatedStudent;
-    } else {
-      // Caso raro, se o aluno não existia antes. Mas a lógica principal é de atualização.
-      newStudentsList.push(updatedStudent);
-    }
-    saveStudentsToLocalStorage(newStudentsList);
-    setStudent(updatedStudent); // Atualiza o estado local do aluno sendo visualizado
-  }, []);
+  useEffect(() => {
+    fetchStudentData();
+  }, [fetchStudentData]);
   
-  const handleAttendanceUpdate = useCallback((newAttendance: AttendanceRecord[]) => {
+  const handleAttendanceUpdate = useCallback(async (newAttendance: AttendanceRecord[]) => {
     if (student) {
       const oldMissedCount = student.missedClassesCount;
-      const updatedStudentData: Student = { 
-        ...student, 
+      const updatedStudentData: Partial<Omit<Student, 'id'>> = { 
         attendance: newAttendance,
         missedClassesCount: newAttendance.filter(att => !att.attended && new Date(att.date) > new Date(student.joinDate)).length
       };
       
-      updateStudentInStorageAndState(updatedStudentData);
+      try {
+        const updatedStudentFromDb = await updateStudent(student.id, updatedStudentData);
+        if (updatedStudentFromDb) {
+          setStudent(updatedStudentFromDb); // Atualiza o estado com os dados do DB
 
-      if (updatedStudentData.missedClassesCount >= ABSENCE_THRESHOLD && oldMissedCount < ABSENCE_THRESHOLD) {
-        toast({
-          title: "Alerta de Faltas para Admin (Simulação)",
-          description: `O aluno ${updatedStudentData.name} atingiu ${updatedStudentData.missedClassesCount} faltas.`,
-          variant: "default",
-          duration: 7000,
-        });
-      }
+          if (updatedStudentFromDb.missedClassesCount >= ABSENCE_THRESHOLD && oldMissedCount < ABSENCE_THRESHOLD) {
+            toast({
+              title: "Alerta de Faltas para Admin (Simulação)",
+              description: `O aluno ${updatedStudentFromDb.name} atingiu ${updatedStudentFromDb.missedClassesCount} faltas.`,
+              variant: "default",
+              duration: 7000,
+            });
+          }
 
-      const consecutiveAbsences = calculateConsecutiveAbsences(updatedStudentData.attendance);
-      if (consecutiveAbsences >= CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK && !student.latestSurveyResponse) {
-         toast({
-          title: "Lembrete de Envio de Pesquisa",
-          description: `O aluno ${updatedStudentData.name} teve ${consecutiveAbsences} faltas consecutivas. Considere enviar o link da pesquisa de satisfação.`,
-          variant: "default",
-          duration: 7000,
-          action: (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => router.push(`/surveys/${MOCK_SURVEY.id}/submit?studentId=${student.id}`)}
-            >
-              Abrir Pesquisa
-            </Button>
-          )
-        });
+          const consecutiveAbsences = calculateConsecutiveAbsences(updatedStudentFromDb.attendance);
+          if (consecutiveAbsences >= CONSECUTIVE_ABSENCES_THRESHOLD_FOR_SURVEY_LINK && !updatedStudentFromDb.latestSurveyResponse) {
+             toast({
+              title: "Lembrete de Envio de Pesquisa",
+              description: `O aluno ${updatedStudentFromDb.name} teve ${consecutiveAbsences} faltas consecutivas. Considere enviar o link da pesquisa de satisfação.`,
+              variant: "default",
+              duration: 7000,
+              action: (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    // Lógica para construir e abrir o link da pesquisa
+                    if (typeof window !== 'undefined' && MOCK_SURVEY?.id && student?.id) {
+                      const surveyLink = `${window.location.origin}/surveys/${MOCK_SURVEY.id}/submit?studentId=${student.id}`;
+                      window.open(surveyLink, '_blank');
+                    } else {
+                      toast({title: "Erro", description: "Não foi possível gerar o link da pesquisa."})
+                    }
+                  }}
+                >
+                  Abrir Pesquisa
+                </Button>
+              )
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar frequência do aluno:", error);
+        toast({variant: "destructive", title: "Erro", description: "Não foi possível atualizar a frequência."});
       }
     }
-  }, [student, updateStudentInStorageAndState, toast, router]);
+  }, [student, toast, router]);
 
-  // Esta função é chamada pelo ProfileDetailsSection
-  const handleProfileUpdate = (updatedStudentData: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl' | 'latestSurveyResponse'>) => {
-     if (student) {
-        const updatedStudent: Student = {
-            ...student,
-            ...updatedStudentData,
-        };
-        updateStudentInStorageAndState(updatedStudent);
-     }
-  };
+  // Esta função é chamada pelo ProfileDetailsSection após o formulário de edição ser submetido e salvo.
+  // Ela recebe o aluno atualizado (já vindo do studentService.updateStudent) e atualiza o estado local.
+  const handleProfileUpdate = useCallback((updatedStudentFromDb: Student) => {
+     setStudent(updatedStudentFromDb); // Atualiza o estado local com os dados retornados do DB/serviço
+     toast({
+        title: "Perfil Atualizado!",
+        description: `Os dados de ${updatedStudentFromDb.name} foram atualizados com sucesso.`,
+     });
+  }, [toast]);
 
 
   if (isLoading) {
