@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { sendAbsenceNotification, type SendAbsenceNotificationInput, type SendAbsenceNotificationOutput } from '@/ai/flows/send-absence-notification';
 import type { Student } from '@/lib/types';
-import { GYM_CONTACT_INFO, ABSENCE_THRESHOLD } from '@/lib/config'; // GYM_NAME removido daqui se vamos sempre usar "Academia Força Local"
-import { MOCK_SURVEY } from '@/lib/constants'; // Importar MOCK_SURVEY
-import { BellRing, MessageSquare, AlertTriangle, Check } from 'lucide-react';
+import { MOCK_SURVEY } from '@/lib/constants'; 
+import { BellRing, MessageSquare, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 
 interface AbsenceNotificationSectionProps {
   student: Student;
@@ -22,6 +21,10 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [origin, setOrigin] = useState('');
+  const { settings, isLoadingSettings } = useAppSettings();
+
+  // Log para depuração
+  console.log("[AbsenceNotificationSection] Received settings:", settings, "isLoadingSettings:", isLoadingSettings);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,6 +40,11 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
   };
 
   const handleSendNotification = async () => {
+    if (!settings) {
+      setError("Configurações da academia não carregadas. Tente novamente mais tarde.");
+      setIsLoading(false); // Adicionado para parar o loading
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setNotificationMessage(null);
@@ -54,9 +62,9 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
       studentId: student.id,
       lastAttendanceDate: getLastAttendanceDate(),
       missedClassesCount: student.missedClassesCount,
-      gymName: "Academia Força Local", // Usar o nome diretamente
-      gymContactInformation: GYM_CONTACT_INFO,
-      surveyLink: surveyLinkForStudent, // Adicionar o link da pesquisa
+      gymName: "Academia Força Local", 
+      gymContactInformation: settings.gymContactInfo, 
+      surveyLink: surveyLinkForStudent,
     };
 
     try {
@@ -74,7 +82,21 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
     }
   };
   
-  const canSendNotification = student.missedClassesCount >= ABSENCE_THRESHOLD;
+  if (isLoadingSettings || !settings) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center"><MessageSquare className="mr-2 h-6 w-6 text-primary" /> Notificação de Ausência (IA)</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mr-2" />
+          <p className="text-muted-foreground">Carregando configurações...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const canSendNotification = student.missedClassesCount >= settings.absenceThreshold;
 
   return (
     <Card>
@@ -85,11 +107,13 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
       <CardContent className="space-y-4">
         <div className="p-4 border rounded-lg bg-muted/30">
           <p className="text-sm font-medium">Aulas Perdidas: <span className="font-bold text-lg text-destructive">{student.missedClassesCount}</span></p>
-          <p className="text-xs text-muted-foreground">Última presença: {new Date(getLastAttendanceDate()).toLocaleDateString('pt-BR')}</p>
+          <p className="text-xs text-muted-foreground">Última presença: {new Date(getLastAttendanceDate() + 'T00:00:00').toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+          <p className="text-xs text-muted-foreground mt-1">Limite para notificação: {settings.absenceThreshold} faltas</p>
         </div>
 
         {canSendNotification ? (
           <Button onClick={handleSendNotification} disabled={isLoading || !origin}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {isLoading ? "Gerando Mensagem..." : "Gerar Mensagem de Notificação"}
             {!origin && isLoading && <span className="text-xs ml-2">(Aguardando URL base...)</span>}
           </Button>
@@ -98,12 +122,12 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
              <Check className="h-4 w-4 text-primary" />
             <AlertTitle className="text-primary">Tudo Certo!</AlertTitle>
             <AlertDescription>
-              O aluno não atingiu o limite de faltas ({ABSENCE_THRESHOLD}) para sugerir uma notificação.
+              O aluno não atingiu o limite de faltas ({settings.absenceThreshold}) para sugerir uma notificação.
             </AlertDescription>
           </Alert>
         )}
 
-        {isLoading && <p>Gerando mensagem, por favor aguarde...</p>}
+        {isLoading && <p className="flex items-center justify-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-2" />Gerando mensagem, por favor aguarde...</p>}
         {error && <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Erro</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
         
         {notificationMessage && (
@@ -114,8 +138,18 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
             <CardContent>
               <p className="text-sm text-foreground whitespace-pre-wrap p-4 border rounded-md bg-accent/10">{notificationMessage}</p>
               <Button className="mt-4" onClick={() => {
-                navigator.clipboard.writeText(notificationMessage);
-                toast({ title: "Mensagem Copiada!", description: "A mensagem foi copiada para a área de transferência."});
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(notificationMessage)
+                    .then(() => {
+                        toast({ title: "Mensagem Copiada!", description: "A mensagem foi copiada para a área de transferência."});
+                    })
+                    .catch(err => {
+                        console.error('Falha ao copiar o link: ', err);
+                        toast({ variant: "destructive", title: "Falha ao Copiar", description: "Não foi possível copiar o link automaticamente."});
+                    });
+                } else {
+                    toast({ variant: "destructive", title: "Cópia Indisponível", description: "Seu navegador não suporta esta funcionalidade de cópia."});
+                }
               }}>
                 <BellRing className="mr-2 h-4 w-4" /> Copiar Mensagem e Simular Envio
               </Button>

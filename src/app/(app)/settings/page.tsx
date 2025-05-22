@@ -1,4 +1,3 @@
-
 // src/app/(app)/settings/page.tsx
 "use client";
 
@@ -9,64 +8,99 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Info, KeyRound, Palette, Bell, Save, Loader2 } from "lucide-react";
+import { Info, Bell, Save, Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
-import { getAppSettings, updateAppSettings, type AppSettings } from '@/lib/configService';
-// Os valores de config.ts não serão mais a fonte primária aqui
-// import { GYM_NAME, GYM_CONTACT_INFO, ABSENCE_THRESHOLD } from "@/lib/config";
+import type { AppSettings } from '@/lib/configService';
+import { updateAppSettings } from '@/lib/configService';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [settings, setSettings] = useState<AppSettings | null>(null);
+  const { settings: appSettingsFromContext, isLoadingSettings: isLoadingContext, refetchSettings, errorSettings } = useAppSettings();
+
   const [gymNameInput, setGymNameInput] = useState('');
   const [gymContactInput, setGymContactInput] = useState('');
-  const [absenceThresholdInput, setAbsenceThresholdInput] = useState<number | string>(3); // Pode ser string do input
-  const [isLoading, setIsLoading] = useState(true);
+  const [absenceThresholdInput, setAbsenceThresholdInput] = useState<number | string>(''); // Inicializa como string vazia
+  
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    async function fetchSettings() {
-      setIsLoading(true);
-      const currentSettings = await getAppSettings();
-      setSettings(currentSettings);
-      setGymNameInput(currentSettings.gymName);
-      setGymContactInput(currentSettings.gymContactInfo);
-      setAbsenceThresholdInput(currentSettings.absenceThreshold);
-      setIsLoading(false);
+    console.log("[SettingsPage] useEffect with context settings:", appSettingsFromContext, "isLoadingContext:", isLoadingContext);
+    if (appSettingsFromContext && !isLoadingContext) {
+      // Só atualiza os inputs se os valores do contexto forem diferentes dos atuais nos inputs
+      // ou se os inputs estiverem vazios (primeira carga)
+      if (gymNameInput === '' || appSettingsFromContext.gymName !== gymNameInput) {
+        setGymNameInput(appSettingsFromContext.gymName);
+      }
+      if (gymContactInput === '' || appSettingsFromContext.gymContactInfo !== gymContactInput) {
+        setGymContactInput(appSettingsFromContext.gymContactInfo);
+      }
+      // Garante que absenceThresholdInput seja uma string para o input type="number"
+      const thresholdFromContext = String(appSettingsFromContext.absenceThreshold);
+      if (absenceThresholdInput === '' || thresholdFromContext !== String(absenceThresholdInput)) {
+        setAbsenceThresholdInput(thresholdFromContext);
+      }
+    } else if (!isLoadingContext && !appSettingsFromContext && !errorSettings) {
+        // Se não está carregando, não tem settings do contexto e não tem erro, usa defaults (já feito pelo context, mas como segurança)
+        console.log("[SettingsPage] useEffect: No context settings, no error, using defaults for inputs");
+        setGymNameInput("Academia Padrão");
+        setGymContactInput("contato@padrao.com");
+        setAbsenceThresholdInput("3");
     }
-    fetchSettings();
-  }, []);
+  }, [appSettingsFromContext, isLoadingContext, errorSettings]); // Removidos os inputs da dependência para evitar loops
+
 
   const handleSaveSettings = async (e: FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    console.log("[SettingsPage] handleSaveSettings - Valores atuais dos inputs ANTES DE SALVAR:", { gymNameInput, gymContactInput, absenceThresholdInput });
 
-    const newSettings: Partial<AppSettings> = {
-      gymName: gymNameInput,
-      gymContactInfo: gymContactInput,
-      absenceThreshold: Number(absenceThresholdInput), // Garante que é número
+    const threshold = Number(absenceThresholdInput);
+    if (isNaN(threshold) || threshold < 0) { // Permite 0, mas o input tem min="1"
+      toast({
+        variant: "destructive",
+        title: "Valor Inválido",
+        description: "O limite de faltas deve ser um número igual ou maior que zero.",
+      });
+      setIsSaving(false);
+      return;
+    }
+
+    const settingsToSave: AppSettings = {
+      gymName: gymNameInput.trim(),
+      gymContactInfo: gymContactInput.trim(),
+      absenceThreshold: threshold,
     };
+    console.log("[SettingsPage] handleSaveSettings - Objeto settingsToSave a ser enviado:", settingsToSave);
 
-    const success = await updateAppSettings(newSettings);
+    const success = await updateAppSettings(settingsToSave);
 
     if (success) {
-      setSettings(prev => ({ ...prev!, ...newSettings })); // Atualiza estado local
       toast({
         title: "Configurações Salvas!",
         description: "As novas configurações foram salvas no Firestore.",
       });
+      // ATUALIZA OS INPUTS LOCAIS IMEDIATAMENTE com os valores que foram salvos
+      setGymNameInput(settingsToSave.gymName);
+      setGymContactInput(settingsToSave.gymContactInfo);
+      setAbsenceThresholdInput(String(settingsToSave.absenceThreshold)); // Converte para string para o input
+      console.log("[SettingsPage] handleSaveSettings - Inputs atualizados localmente IMEDIATAMENTE para:", settingsToSave);
+      
+      // Refaz o fetch das configurações para atualizar o contexto global
+      console.log("[SettingsPage] handleSaveSettings - Chamando refetchSettings...");
+      await refetchSettings();
+      console.log("[SettingsPage] handleSaveSettings - refetchSettings chamado e concluído.");
     } else {
       toast({
         variant: "destructive",
         title: "Erro ao Salvar",
-        description: "Não foi possível salvar as configurações. Tente novamente.",
+        description: "Não foi possível salvar as configurações. Verifique os logs.",
       });
     }
     setIsSaving(false);
   };
 
-  if (isLoading) {
+  if (isLoadingContext && !appSettingsFromContext) { // Mostra carregando apenas se appSettingsFromContext ainda for null
     return (
       <div>
         <PageHeader 
@@ -81,7 +115,7 @@ export default function SettingsPage() {
     );
   }
   
-  if (!settings) {
+  if (errorSettings && !appSettingsFromContext) { // Mostra erro apenas se appSettingsFromContext ainda for null
      return (
       <div>
         <PageHeader 
@@ -90,25 +124,28 @@ export default function SettingsPage() {
         />
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Erro</AlertTitle>
+          <AlertTitle>Erro ao Carregar Configurações Iniciais</AlertTitle>
           <AlertDescription>
-            Não foi possível carregar as configurações. Verifique sua conexão com o Firebase.
+            Não foi possível carregar as configurações do sistema. Verifique os logs do Firebase. Detalhes: {errorSettings}
           </AlertDescription>
         </Alert>
       </div>
     );
   }
 
+  // Se chegou aqui, ou appSettingsFromContext tem valor, ou houve erro mas já temos defaults nos inputs
+  // ou os inputs ainda estão com seus valores iniciais se appSettingsFromContext for null mas isLoadingContext for false
+  // Esta lógica garante que os inputs sejam preenchidos na primeira carga ou se houver erro e o contexto fornecer defaults.
 
   return (
     <div>
       <PageHeader 
         title="Configurações do Sistema" 
-        description="Gerencie as configurações gerais da aplicação Amigos Fitness."
+        description="Gerencie as configurações gerais da sua academia e do aplicativo Amigos Fitness."
       />
 
       <form onSubmit={handleSaveSettings}>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2">
           
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -123,7 +160,8 @@ export default function SettingsPage() {
                   value={gymNameInput} 
                   onChange={(e) => setGymNameInput(e.target.value)}
                   className="mt-1" 
-                  disabled={isSaving}
+                  disabled={isSaving || isLoadingContext}
+                  placeholder="Ex: Academia Força Total"
                 />
               </div>
               <div>
@@ -133,7 +171,8 @@ export default function SettingsPage() {
                   value={gymContactInput} 
                   onChange={(e) => setGymContactInput(e.target.value)}
                   className="mt-1" 
-                  disabled={isSaving}
+                  disabled={isSaving || isLoadingContext}
+                  placeholder="Ex: contato@suaacademia.com / (XX) 9XXXX-XXXX"
                 />
               </div>
             </CardContent>
@@ -150,59 +189,23 @@ export default function SettingsPage() {
                 <Input 
                   id="absenceThreshold" 
                   type="number" 
-                  value={absenceThresholdInput} 
-                  onChange={(e) => setAbsenceThresholdInput(e.target.value)}
+                  value={String(absenceThresholdInput)} // Garante que seja string para o input
+                  onChange={(e) => setAbsenceThresholdInput(e.target.value)} // Pega como string
                   className="mt-1" 
-                  disabled={isSaving}
-                  min="1"
+                  disabled={isSaving || isLoadingContext}
+                  min="0"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Nº de faltas para sugerir notificação de ausência.</p>
+                <p className="text-xs text-muted-foreground mt-1">Nº de faltas para sugerir notificação de ausência e alerta ao admin.</p>
               </div>
             </CardContent>
           </Card>
 
-          <div className="lg:col-span-3 flex justify-end mt-2">
-            <Button type="submit" disabled={isSaving || isLoading} size="lg">
+          <div className="md:col-span-2 flex justify-end mt-2">
+            <Button type="submit" disabled={isSaving || (isLoadingContext && !appSettingsFromContext)} size="lg">
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               {isSaving ? "Salvando..." : "Salvar Configurações"}
             </Button>
           </div>
-          
-          <Card className="lg:col-span-1 mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center"><Palette className="mr-2 h-5 w-5 text-primary" /> Aparência</CardTitle>
-              <CardDescription>Personalize a aparência do sistema (em desenvolvimento).</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Opções para alterar cores, tema (claro/escuro) e logo poderiam ser adicionadas aqui no futuro.
-              </p>
-              <Button disabled variant="outline">Alterar Tema (Em breve)</Button>
-            </CardContent>
-          </Card>
-
-          <Card className="md:col-span-2 lg:col-span-3 mt-8">
-              <CardHeader>
-                  <CardTitle className="flex items-center"><KeyRound className="mr-2 h-5 w-5 text-primary" /> Gerenciamento de Administrador</CardTitle>
-                  <CardDescription>Configurações relacionadas à conta de administrador.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                  <Alert variant="default">
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Funcionalidade Avançada</AlertTitle>
-                      <AlertDescription>
-                          Em uma aplicação completa, esta seção permitiria:
-                          <ul className="list-disc list-inside mt-2 pl-4 text-sm">
-                          <li>Alterar senha do administrador.</li>
-                          <li>Configurar autenticação de dois fatores.</li>
-                          <li>Gerenciar outros usuários administradores (se aplicável).</li>
-                          </ul>
-                          <p className="mt-2">A implementação de um sistema de autenticação e gerenciamento de usuários seguro é um processo complexo que envolve backend e não está no escopo atual.</p>
-                      </AlertDescription>
-                  </Alert>
-              </CardContent>
-          </Card>
-
         </div>
       </form>
     </div>
