@@ -1,8 +1,9 @@
+
 // src/lib/studentService.ts
-"use server"; 
+// "use server"; // REMOVIDO
 
 import type { Student, AttendanceRecord, SurveyResponse } from './types';
-import { db } from './firebaseConfig'; // Importa a instância do Firestore
+import { db } from './firebaseConfig';
 import { 
   collection, 
   getDocs, 
@@ -14,23 +15,21 @@ import {
   orderBy, 
   Timestamp 
 } from 'firebase/firestore';
-// localStorageUtils não será mais usado aqui quando tudo estiver no Firestore
-// import { getStudentsFromLocalStorage, saveStudentsToLocalStorage } from './localStorageUtils';
-
 
 // Helper para converter dados do Firestore para o tipo Student, tratando Timestamps e campos ausentes
 function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot): Student {
   const data = docSnap.data();
+  // Adiciona um log para ver os dados brutos do Firestore
+  // console.log(`[mapDocToStudent] Mapeando doc ID: ${docSnap.id}, Dados Brutos:`, JSON.stringify(data, null, 2));
+
   if (!data) {
-    console.error(`[mapDocToStudent] Document data is undefined for mapping! Doc ID: ${docSnap.id}`);
-    // Retorna um objeto Student parcialmente preenchido ou lança um erro mais específico.
-    // Preenche com o máximo de defaults para evitar quebrar a UI.
+    console.error(`[mapDocToStudent] Document data is undefined for mapping! Doc ID: ${docSnap.id}. Retornando defaults.`);
     return {
-        id: docSnap.id,
+        id: docSnap.id, // Ainda retorna o ID se disponível
         name: "Erro: Nome Indisp.",
         email: "Erro: Email Indisp.",
         membershipType: "Basico",
-        joinDate: new Date().toISOString().split('T')[0],
+        joinDate: new Date().toISOString().split('T')[0], // Data atual como padrão
         attendance: [],
         missedClassesCount: 0,
         phone: "",
@@ -38,7 +37,7 @@ function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot)
         emergencyContactName: "",
         emergencyContactPhone: "",
         profilePictureUrl: "",
-        latestSurveyResponse: undefined, // Será null se não existir no Firestore
+        latestSurveyResponse: undefined,
         genderIdentity: "nao_informado",
         maritalStatus: "nao_informado",
         hasChildren: "nao_informado",
@@ -65,51 +64,46 @@ function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot)
         wantsFollowUpApp: "nao_informado",
         contractPlan: "nao_informado",
         paymentMethod: "nao_informado",
-    } as Student; // Afirmação de tipo para satisfazer o compilador com os defaults
+    } as Student;
   }
   
-  const convertTimestampToString = (timestampField: any, fieldName: string): string => {
-    // Função interna para logs mais detalhados
-    const logPrefix = `[mapDocToStudent Field: ${fieldName}, DocID: ${docSnap.id}]`;
-
+  const convertTimestampToString = (timestampField: any, fieldNameForLog: string): string => {
+    const logPrefix = `[mapDocToStudent Field: ${fieldNameForLog}, DocID: ${docSnap.id}]`;
     if (!timestampField) {
-        // Se o campo não existir ou for null/undefined, retorna uma string vazia ou uma data padrão.
-        // Para joinDate, uma data padrão é melhor. Para dateOfBirth, talvez string vazia.
-        if (fieldName === 'joinDate') return new Date().toISOString().split('T')[0];
+        if (fieldNameForLog === 'joinDate') return new Date().toISOString().split('T')[0];
         return ""; 
     }
     if (timestampField instanceof Timestamp) {
-      return timestampField.toDate().toISOString().split('T')[0]; // Pega apenas YYYY-MM-DD
+      return timestampField.toDate().toISOString().split('T')[0];
     }
     if (typeof timestampField === 'string') {
       try {
         const dateObj = new Date(timestampField);
         if (!isNaN(dateObj.getTime())) {
-            // Se for uma string de data completa (com T), pegue apenas a parte da data
             return dateObj.toISOString().split('T')[0];
         }
-        // Se já for YYYY-MM-DD, retorne como está
         if (/^\d{4}-\d{2}-\d{2}$/.test(timestampField)) {
             return timestampField;
         }
-        console.warn(`${logPrefix} String de data não reconhecida ou em formato inesperado: ${timestampField}. Retornando original.`);
+        console.warn(`${logPrefix} String de data não reconhecida: ${timestampField}. Retornando original.`);
         return timestampField; 
       } catch (e) {
         console.warn(`${logPrefix} Não foi possível converter a string de data: ${timestampField}`, e);
         return timestampField; 
       }
     }
+    // Lidar com objetos que são Timestamps serializados (comum de Firestore quando não é Timestamp instance)
     if (typeof timestampField === 'object' && timestampField.seconds !== undefined && timestampField.nanoseconds !== undefined) {
         try {
             const dateFromObject = new Timestamp(timestampField.seconds, timestampField.nanoseconds).toDate();
             return dateFromObject.toISOString().split('T')[0];
         } catch (e) {
             console.warn(`${logPrefix} Não foi possível converter objeto de timestamp:`, timestampField, e);
-            return fieldName === 'joinDate' ? new Date().toISOString().split('T')[0] : "";
+            return fieldNameForLog === 'joinDate' ? new Date().toISOString().split('T')[0] : "";
         }
     }
     console.warn(`${logPrefix} Campo de timestamp não é Timestamp nem string válida: ${String(timestampField)}. Retornando default.`);
-    return fieldName === 'joinDate' ? new Date().toISOString().split('T')[0] : "";
+    return fieldNameForLog === 'joinDate' ? new Date().toISOString().split('T')[0] : "";
   };
 
   const mapAttendance = (attendanceArray: any): AttendanceRecord[] => {
@@ -124,7 +118,10 @@ function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot)
             console.warn(`[mapDocToStudent DocID: ${docSnap.id}] Formato de data de frequência inválido: ${dateStr}. Usando data atual.`);
             dateStr = new Date().toISOString().split('T')[0];
          }
-      } else {
+      } else if (typeof att.date === 'object' && att.date.seconds !== undefined) { // Handle serialized Timestamps in attendance
+        dateStr = new Timestamp(att.date.seconds, att.date.nanoseconds).toDate().toISOString().split('T')[0];
+      }
+      else {
         console.warn(`[mapDocToStudent DocID: ${docSnap.id}] Data de frequência inválida (tipo): ${String(att.date)}. Usando data atual.`);
         dateStr = new Date().toISOString().split('T')[0];
       }
@@ -135,6 +132,16 @@ function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot)
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
   
+  let latestSurveyResponseMapped: SurveyResponse | undefined = undefined;
+  if (data.latestSurveyResponse) {
+    latestSurveyResponseMapped = {
+      surveyId: data.latestSurveyResponse.surveyId || "",
+      studentId: data.latestSurveyResponse.studentId || docSnap.id,
+      submittedAt: convertTimestampToString(data.latestSurveyResponse.submittedAt, 'latestSurveyResponse.submittedAt'),
+      answers: Array.isArray(data.latestSurveyResponse.answers) ? data.latestSurveyResponse.answers : [],
+    };
+  }
+
   const studentData: Student = {
     id: docSnap.id,
     name: data.name || "Nome Indisponível",
@@ -145,15 +152,10 @@ function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot)
     emergencyContactPhone: data.emergencyContactPhone || "",
     membershipType: data.membershipType || "Basico",
     joinDate: convertTimestampToString(data.joinDate, 'joinDate'),
-    profilePictureUrl: data.profilePictureUrl || "", // Default se não houver
+    profilePictureUrl: data.profilePictureUrl || "",
     attendance: mapAttendance(data.attendance),
     missedClassesCount: typeof data.missedClassesCount === 'number' ? data.missedClassesCount : 0,
-    latestSurveyResponse: data.latestSurveyResponse ? {
-      surveyId: data.latestSurveyResponse.surveyId || "",
-      studentId: data.latestSurveyResponse.studentId || docSnap.id,
-      submittedAt: convertTimestampToString(data.latestSurveyResponse.submittedAt, 'latestSurveyResponse.submittedAt'),
-      answers: Array.isArray(data.latestSurveyResponse.answers) ? data.latestSurveyResponse.answers : [],
-    } : undefined, // undefined se não houver
+    latestSurveyResponse: latestSurveyResponseMapped,
     genderIdentity: data.genderIdentity || "nao_informado",
     maritalStatus: data.maritalStatus || "nao_informado",
     hasChildren: data.hasChildren || "nao_informado",
@@ -181,23 +183,22 @@ function mapDocToStudent(docSnap: import("firebase/firestore").DocumentSnapshot)
     contractPlan: data.contractPlan || "nao_informado",
     paymentMethod: data.paymentMethod || "nao_informado",
   };
+  // console.log(`[mapDocToStudent] Mapeado para Student:`, JSON.stringify(studentData, null, 2));
   return studentData;
 }
 
-// --- Funções que interagem com o Firestore ---
-
 export async function getStudents(): Promise<Student[]> {
-  console.log("[StudentService-Firestore] getStudents: Buscando alunos do Firestore");
+  console.log("[StudentService-Firestore] getStudents: Buscando alunos do Firestore.");
   try {
     const studentsCollection = collection(db, "students");
     const q = query(studentsCollection, orderBy("joinDate", "desc"));
     const querySnapshot = await getDocs(q);
     
     const students = querySnapshot.docs.map(mapDocToStudent);
-    console.log("[StudentService-Firestore] Alunos buscados do Firestore:", students.length);
+    console.log(`[StudentService-Firestore] ${students.length} alunos buscados do Firestore.`);
     return students;
   } catch (error) {
-    console.error("[StudentService-Firestore] Erro CRÍTICO ao buscar alunos do Firestore:", error);
+    console.error("[StudentService-Firestore] ERRO CRÍTICO ao buscar alunos do Firestore:", error);
     return []; 
   }
 }
@@ -206,9 +207,8 @@ export async function addStudent(
   newStudentData: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl'>
 ): Promise<Student> {
   console.log("[StudentService-Firestore] addStudent: Adicionando ao Firestore:", JSON.stringify(newStudentData, null, 2));
-  try {
-    // Prepara o objeto para salvar, convertendo 'undefined' para 'null' ou valores padrão
-    const studentToSave: Omit<Student, 'id'> = {
+  
+  const studentToSave = {
       name: newStudentData.name || "Nome não fornecido",
       email: newStudentData.email || "email@naofornecido.com",
       joinDate: newStudentData.joinDate || new Date().toISOString().split('T')[0],
@@ -224,7 +224,7 @@ export async function addStudent(
       missedClassesCount: 0, 
       latestSurveyResponse: newStudentData.latestSurveyResponse === undefined ? null : {
         ...newStudentData.latestSurveyResponse,
-        submittedAt: newStudentData.latestSurveyResponse.submittedAt || new Date().toISOString(),
+        submittedAt: newStudentData.latestSurveyResponse.submittedAt ? new Date(newStudentData.latestSurveyResponse.submittedAt).toISOString() : new Date().toISOString(),
         answers: newStudentData.latestSurveyResponse.answers || [],
       },
       
@@ -255,19 +255,16 @@ export async function addStudent(
       contractPlan: newStudentData.contractPlan || "nao_informado",
       paymentMethod: newStudentData.paymentMethod || "nao_informado",
     };
-    
-    // Firestore não aceita chaves com valor 'undefined'. O objeto acima já trata isso.
+
+  try {
     const docRef = await addDoc(collection(db, "students"), studentToSave);
     console.log("[StudentService-Firestore] Aluno adicionado ao Firestore com ID: ", docRef.id);
-    
-    // Retorna o aluno completo, incluindo o ID gerado e os defaults aplicados.
     return { id: docRef.id, ...studentToSave } as Student;
   } catch (error) {
     console.error("[StudentService-Firestore] Erro CRÍTICO ao adicionar aluno no Firestore:", error);
-    throw error; // Relança o erro para ser tratado pelo chamador (ex: AddStudentDialog)
+    throw error;
   }
 }
-
 
 export async function getStudentById(id: string): Promise<Student | undefined> {
   console.log(`[StudentService-Firestore] getStudentById para ID: ${id}`);
@@ -298,37 +295,36 @@ export async function updateStudent(id: string, updatedData: Partial<Omit<Studen
     console.error("[StudentService-Firestore] updateStudent chamado sem ID.");
     return undefined;
   }
+
+  let docSnapBeforeUpdate;
   try {
     const studentDocRef = doc(db, "students", id);
+    docSnapBeforeUpdate = await getDoc(studentDocRef); // Para log e possível retorno em caso de erro de update
 
-    // Verificar se o aluno existe antes de tentar atualizar
-    const docSnapBeforeUpdate = await getDoc(studentDocRef);
     if (!docSnapBeforeUpdate.exists()) {
       console.error(`[StudentService-Firestore] updateStudent ERRO: Aluno com ID ${id} NÃO ENCONTRADO para atualização.`);
       return undefined; 
     }
-    console.log(`[StudentService-Firestore] updateStudent: Aluno ${id} encontrado ANTES da atualização.`);
+    console.log(`[StudentService-Firestore] updateStudent: Aluno ${id} encontrado ANTES da atualização. Dados atuais:`, JSON.stringify(docSnapBeforeUpdate.data(), null, 2));
     
-    // Prepara os dados para o Firestore, convertendo 'undefined' para 'null'
-    // e tratando Timestamps se necessário (embora updateDoc lide bem com strings ISO para datas existentes).
     const dataToUpdateForFirestore: { [key: string]: any } = {};
     for (const key in updatedData) {
       if (Object.prototype.hasOwnProperty.call(updatedData, key)) {
         const value = (updatedData as any)[key];
         
         if (value === undefined) {
-          dataToUpdateForFirestore[key] = null; // Converte undefined para null
+          // Não enviamos 'undefined'. Se quisermos remover um campo, usaríamos FieldValue.delete()
+          // ou definiríamos como null se isso for aceitável para o campo.
+          // Por enquanto, apenas não incluímos campos undefined no objeto de atualização.
+          console.warn(`[StudentService-Firestore] updateStudent: Campo '${key}' era undefined e não será enviado para update.`);
         } else if (key === 'latestSurveyResponse' && value && typeof value.submittedAt === 'string') {
-          // Se 'submittedAt' for uma string, tentamos converter para Timestamp
-          // Embora o Firestore também aceite strings ISO para campos de data.
-          // Se já for Timestamp, está ok. Se for null, também ok.
            dataToUpdateForFirestore[key] = {
              ...value,
-             submittedAt: Timestamp.fromDate(new Date(value.submittedAt)) // Garante que seja Timestamp
+             // Converte para Timestamp se for string, para consistência no DB
+             submittedAt: Timestamp.fromDate(new Date(value.submittedAt))
            };
         } else if ((key === 'joinDate' || key === 'dateOfBirth') && typeof value === 'string' && value) {
-            // Para datas no formato YYYY-MM-DD, podemos salvar como string.
-            // Ou converter para Timestamp: dataToUpdateForFirestore[key] = Timestamp.fromDate(new Date(value + "T00:00:00Z"));
+            // Datas como YYYY-MM-DD são salvas como string. Poderiam ser Timestamps.
             dataToUpdateForFirestore[key] = value;
         } else {
           dataToUpdateForFirestore[key] = value;
@@ -337,7 +333,7 @@ export async function updateStudent(id: string, updatedData: Partial<Omit<Studen
     }
     
     if (Object.keys(dataToUpdateForFirestore).length === 0) {
-      console.warn("[StudentService-Firestore] updateStudent: Nenhum dado válido fornecido para atualização. Retornando aluno atual.");
+      console.warn("[StudentService-Firestore] updateStudent: Nenhum dado válido fornecido para atualização (após limpar undefineds). Retornando aluno atual sem alteração no DB.");
       return mapDocToStudent(docSnapBeforeUpdate); 
     }
 
@@ -346,23 +342,19 @@ export async function updateStudent(id: string, updatedData: Partial<Omit<Studen
     await updateDoc(studentDocRef, dataToUpdateForFirestore);
     console.log(`[StudentService-Firestore] updateStudent: Aluno com ID ${id} atualizado com sucesso no Firestore.`);
     
-    // Busca o documento atualizado para retornar os dados mais recentes
     const updatedDocSnap = await getDoc(studentDocRef);
     if (updatedDocSnap.exists()) {
-      console.log(`[StudentService-Firestore] updateStudent: Dados do aluno ${id} APÓS atualização:`, updatedDocSnap.data());
+      // console.log(`[StudentService-Firestore] updateStudent: Dados do aluno ${id} APÓS atualização:`, JSON.stringify(updatedDocSnap.data(), null, 2));
       return mapDocToStudent(updatedDocSnap);
     }
     
-    // Isso não deveria acontecer se updateDoc foi bem-sucedido e o doc existia antes.
     console.error(`[StudentService-Firestore] updateStudent ERRO: Documento do aluno com ID ${id} não encontrado APÓS uma atualização supostamente bem-sucedida.`);
-    return undefined; // Ou o aluno antes da tentativa de update
+    return undefined;
   } catch (error) {
     console.error(`[StudentService-Firestore] updateStudent ERRO CRÍTICO ao atualizar aluno com ID ${id} no Firestore:`, error);
-    // Tenta retornar o aluno antes da tentativa de atualização se possível
-    const studentBeforeError = docSnapBeforeUpdate && docSnapBeforeUpdate.exists() ? mapDocToStudent(docSnapBeforeUpdate) : undefined;
-    if (studentBeforeError) {
+    if (docSnapBeforeUpdate && docSnapBeforeUpdate.exists()) {
         console.warn("[StudentService-Firestore] updateStudent: Retornando dados do aluno ANTES do erro de atualização.");
-        return studentBeforeError;
+        return mapDocToStudent(docSnapBeforeUpdate);
     }
     return undefined; 
   }
@@ -370,12 +362,9 @@ export async function updateStudent(id: string, updatedData: Partial<Omit<Studen
 
 export async function updateStudentSurveyResponse(studentId: string, surveyResponse: SurveyResponse): Promise<Student | undefined> {
   console.log(`[StudentService-Firestore] updateStudentSurveyResponse: Atualizando pesquisa para student ID: ${studentId}`);
-  // Garante que submittedAt seja uma string ISO para consistência ou null.
-  // O updateStudent irá converter para Timestamp se necessário, mas aqui garantimos o formato de entrada.
   const surveyResponseForUpdate: SurveyResponse = {
     ...surveyResponse,
     submittedAt: surveyResponse.submittedAt ? new Date(surveyResponse.submittedAt).toISOString() : new Date().toISOString(),
   };
   return updateStudent(studentId, { latestSurveyResponse: surveyResponseForUpdate });
 }
-    

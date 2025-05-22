@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -9,9 +8,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
+  DialogTrigger, // Adicionado para controlar a abertura pelo botão
 } from "@/components/ui/dialog";
 import { StudentForm } from "./StudentForm";
 import type { Student } from "@/lib/types";
@@ -19,7 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 import { PlusCircle } from "lucide-react";
 
 interface AddStudentDialogProps {
-  onStudentAdded: (newStudent: Student) => void;
+  onStudentAdded: (
+    data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl' | 'latestSurveyResponse'>
+  ) => Promise<void>; // A função agora é async para alinhar com o studentService
 }
 
 export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
@@ -27,27 +26,27 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl' | 'latestSurveyResponse'>) => {
+  const handleSubmit = async (
+    data: Omit<Student, 'id' | 'attendance' | 'missedClassesCount' | 'profilePictureUrl' | 'latestSurveyResponse'>
+  ) => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const newStudent: Student = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9), // mock ID
-      profilePictureUrl: 'https://placehold.co/100x100.png',
-      attendance: [],
-      missedClassesCount: 0,
-      latestSurveyResponse: undefined, // Ensure new students don't have a survey response by default
-    };
-    
-    onStudentAdded(newStudent);
-    setIsSubmitting(false);
-    setOpen(false);
-    toast({
-      title: "Aluno Adicionado!",
-      description: `${newStudent.name} foi adicionado com sucesso.`,
-    });
+    try {
+      await onStudentAdded(data); // Chama a função passada, que agora usa o studentService
+      setOpen(false); // Fecha o diálogo após a adição bem-sucedida
+      toast({
+        title: "Aluno Adicionado!",
+        description: `${data.name} foi cadastrado com sucesso. A lista será atualizada.`,
+      });
+    } catch (error) {
+      console.error("Erro ao processar adição de aluno:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao Adicionar",
+        description: "Não foi possível adicionar o aluno. Tente novamente.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -57,7 +56,7 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Aluno
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Aluno</DialogTitle>
           <DialogDescription>
@@ -66,11 +65,10 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
         </DialogHeader>
         <StudentForm 
           onSubmit={handleSubmit} 
-          onCancel={() => setOpen(false)}
+          onCancel={() => setOpen(false)} // Adicionado para fechar o diálogo ao cancelar
           isSubmitting={isSubmitting} 
         />
       </DialogContent>
     </Dialog>
   );
 }
-
