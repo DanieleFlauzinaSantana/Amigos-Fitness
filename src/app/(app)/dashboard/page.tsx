@@ -1,14 +1,14 @@
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Activity, FileText, BarChart3 } from "lucide-react";
+import { Users, Activity, FileText } from "lucide-react"; // Removido BarChart3 pois não está sendo usado aqui
 import Image from "next/image";
 import Link from "next/link";
 
 export default function DashboardPage() {
   return (
     <div>
-      <PageHeader title="Painel" description="Bem-vindo à Amigos Fitness!" />
+      <PageHeader title="Painel" description="Bem-vindo ao Amigos Fitness!" />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -16,8 +16,8 @@ export default function DashboardPage() {
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">150</div>
-            <p className="text-xs text-muted-foreground">+10% desde o mês passado</p>
+            <div className="text-2xl font-bold">0</div> {/* Placeholder, idealmente viria do Firestore */}
+            <p className="text-xs text-muted-foreground">Atualize para ver novos alunos</p>
             <Link href="/students" className="text-sm text-primary hover:underline mt-2 block">Ver Alunos</Link>
           </CardContent>
         </Card>
@@ -28,8 +28,8 @@ export default function DashboardPage() {
             <Activity className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">78</div>
-            <p className="text-xs text-muted-foreground">Média de 70 por dia</p>
+            <div className="text-2xl font-bold">0</div> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">Dados de check-in seriam agregados aqui</p>
             <Link href="/checkin" className="text-sm text-primary hover:underline mt-2 block">Ver Check-ins / Registrar Presença</Link>
           </CardContent>
         </Card>
@@ -58,17 +58,17 @@ export default function DashboardPage() {
                 <li>Gerenciamento completo de perfis de alunos.</li>
                 <li>Registro diário de check-ins de frequência.</li>
                 <li>Previsão de desistências com IA.</li>
-                <li>Notificações automáticas por falta de frequência.</li>
-                <li>Pesquisas de satisfação personalizáveis.</li>
+                <li>Notificações de ausência (geradas manualmente).</li>
+                <li>Pesquisas de satisfação personalizáveis (no código).</li>
               </ul>
             </div>
             <div className="flex-shrink-0">
               <Image 
-                src="https://placehold.co/302x202.png" 
-                alt="Academia em atividade" 
-                data-ai-hint="gym activity" 
-                width={302} 
-                height={202}
+                src="https://placehold.co/300x200.png?text=Amigos+Fitness" 
+                alt="Logo ou imagem da Amigos Fitness" 
+                data-ai-hint="fitness app brand" 
+                width={300} 
+                height={200}
                 className="rounded-lg object-cover"
               />
             </div>
@@ -78,3 +78,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

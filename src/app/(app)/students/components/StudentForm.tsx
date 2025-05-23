@@ -30,6 +30,7 @@ const studentFormSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres." }),
   email: z.string().email({ message: "Email inválido." }),
   phone: z.string().optional(),
+  profilePictureUrl: z.string().url({ message: "URL da foto de perfil inválida (ex: https://...)" }).optional().or(z.literal('')), // Permite URL ou string vazia
   dateOfBirth: z.string().optional(),
   joinDate: z.string().min(1, {message: "Data de início é obrigatória"}),
   membershipType: z.enum(["Basico", "Premium", "Experimental"]),
@@ -80,7 +81,7 @@ const studentFormSchema = z.object({
 type StudentFormValues = z.infer<typeof studentFormSchema>;
 
 interface StudentFormProps {
-  student?: Student;
+  student?: Student; // Student é opcional para o caso de adição
   onSubmit: (data: StudentFormValues) => void;
   onCancel?: () => void;
   isSubmitting?: boolean;
@@ -95,6 +96,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
     resolver: zodResolver(studentFormSchema),
     defaultValues: student ? {
       ...student,
+      profilePictureUrl: student.profilePictureUrl || '',
       dateOfBirth: student.dateOfBirth || '',
       phone: student.phone || '',
       emergencyContactName: student.emergencyContactName || '',
@@ -129,6 +131,7 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
       name: "",
       email: "",
       phone: "",
+      profilePictureUrl: "",
       dateOfBirth: "",
       joinDate: new Date().toISOString().split('T')[0], // Default to today
       membershipType: "Basico",
@@ -207,6 +210,22 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
                 <FormControl>
                   <Input placeholder="(XX) XXXXX-XXXX" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
+            control={form.control}
+            name="profilePictureUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL da Foto de Perfil</FormLabel>
+                <FormControl>
+                  <Input type="url" placeholder="https://example.com/foto.png" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Cole o link (URL) para a foto do aluno.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -764,3 +783,5 @@ export function StudentForm({ student, onSubmit, onCancel, isSubmitting }: Stude
     </Form>
   );
 }
+
+    

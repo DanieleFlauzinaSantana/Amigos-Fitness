@@ -1,3 +1,4 @@
+// src/app/(app)/students/[id]/components/AbsenceNotificationSection.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,6 +11,7 @@ import { MOCK_SURVEY } from '@/lib/constants';
 import { BellRing, MessageSquare, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAppSettings } from '@/contexts/AppSettingsContext';
+import { format } from 'date-fns'; // Adicionado para formatar a data
 
 interface AbsenceNotificationSectionProps {
   student: Student;
@@ -23,8 +25,25 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
   const [origin, setOrigin] = useState('');
   const { settings, isLoadingSettings } = useAppSettings();
 
-  // Log para depuração
-  console.log("[AbsenceNotificationSection] Received settings:", settings, "isLoadingSettings:", isLoadingSettings);
+  // Log aprimorado para depuração
+  useEffect(() => {
+    if (student && settings) {
+      console.log(
+        "[AbsenceNotificationSection] Props received/updated - Student Name:", student.name,
+        "| Missed Classes:", student.missedClassesCount,
+        "| Settings Absence Threshold:", settings.absenceThreshold,
+        "| IsLoadingSettings:", isLoadingSettings
+      );
+    } else if (student) {
+      console.log(
+        "[AbsenceNotificationSection] Props received/updated - Student Name:", student.name,
+        "| Missed Classes:", student.missedClassesCount,
+        "| Settings: Not yet loaded or error",
+        "| IsLoadingSettings:", isLoadingSettings
+      );
+    }
+  }, [student, settings, isLoadingSettings]);
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -33,16 +52,38 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
   }, []);
 
   const getLastAttendanceDate = () => {
+    if (!student || !student.attendance || student.attendance.length === 0) {
+      // Se não houver student.joinDate, retorna uma string indicando que não há dados
+      return student?.joinDate ? student.joinDate : "N/A";
+    }
     const attendedRecords = student.attendance
       .filter(att => att.attended)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return attendedRecords.length > 0 ? attendedRecords[0].date : student.joinDate;
+    return attendedRecords.length > 0 ? attendedRecords[0].date : (student.joinDate || "N/A");
   };
+  
+  const formattedLastAttendanceDate = () => {
+    const dateStr = getLastAttendanceDate();
+    if (dateStr === "N/A" || !dateStr) return "N/A";
+    try {
+      // Adiciona T00:00:00 para tratar a string como data local e evitar problemas de fuso horário
+      return format(new Date(dateStr + 'T00:00:00'), 'dd/MM/yyyy');
+    } catch (e) {
+      console.error("[AbsenceNotificationSection] Error formatting last attendance date:", dateStr, e);
+      return dateStr; // Retorna a string original se houver erro na formatação
+    }
+  };
+
 
   const handleSendNotification = async () => {
     if (!settings) {
       setError("Configurações da academia não carregadas. Tente novamente mais tarde.");
-      setIsLoading(false); // Adicionado para parar o loading
+      setIsLoading(false);
+      return;
+    }
+    if (!student) {
+      setError("Dados do aluno não disponíveis.");
+      setIsLoading(false);
       return;
     }
     setIsLoading(true);
@@ -56,11 +97,12 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
     }
     
     const surveyLinkForStudent = `${origin}/surveys/${MOCK_SURVEY.id}/submit?studentId=${student.id}`;
+    const lastAttDate = getLastAttendanceDate();
 
     const input: SendAbsenceNotificationInput = {
       studentName: student.name,
       studentId: student.id,
-      lastAttendanceDate: getLastAttendanceDate(),
+      lastAttendanceDate: lastAttDate === "N/A" ? new Date().toISOString().split('T')[0] : lastAttDate, // Envia data atual se N/A
       missedClassesCount: student.missedClassesCount,
       gymName: "Academia Força Local", 
       gymContactInformation: settings.gymContactInfo, 
@@ -82,7 +124,7 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
     }
   };
   
-  if (isLoadingSettings || !settings) {
+  if (isLoadingSettings || !settings || !student) { // Adicionado !student aqui também
     return (
       <Card>
         <CardHeader>
@@ -90,7 +132,7 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
         </CardHeader>
         <CardContent className="flex items-center justify-center p-6">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mr-2" />
-          <p className="text-muted-foreground">Carregando configurações...</p>
+          <p className="text-muted-foreground">Carregando dados e configurações...</p>
         </CardContent>
       </Card>
     );
@@ -107,13 +149,13 @@ export function AbsenceNotificationSection({ student }: AbsenceNotificationSecti
       <CardContent className="space-y-4">
         <div className="p-4 border rounded-lg bg-muted/30">
           <p className="text-sm font-medium">Aulas Perdidas: <span className="font-bold text-lg text-destructive">{student.missedClassesCount}</span></p>
-          <p className="text-xs text-muted-foreground">Última presença: {new Date(getLastAttendanceDate() + 'T00:00:00').toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+          <p className="text-xs text-muted-foreground">Última presença: {formattedLastAttendanceDate()}</p>
           <p className="text-xs text-muted-foreground mt-1">Limite para notificação: {settings.absenceThreshold} faltas</p>
         </div>
 
         {canSendNotification ? (
           <Button onClick={handleSendNotification} disabled={isLoading || !origin}>
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? "Gerando Mensagem..." : "Gerar Mensagem de Notificação"}
             {!origin && isLoading && <span className="text-xs ml-2">(Aguardando URL base...)</span>}
           </Button>
